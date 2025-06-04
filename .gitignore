@@ -1,0 +1,55 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+myenv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python environment files
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Environment variable files
+.env
+*.env
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Test output
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Dash/Plotly user settings or cache
+.cache/
+dash_debug.json
+
+# Data files (optional if large or sensitive)
+data/
+*.csv
+*.json
+
+# VSCode and IDEs
+.vscode/
+.idea/
+
+# Images (optional)
+assets/*.webp
+assets/*.png
+assets/*.jpg
+assets/*.jpeg
+
