@@ -38,18 +38,9 @@ coverage.xml
 .cache/
 dash_debug.json
 
-# Data files (optional if large or sensitive)
-data/
-*.csv
-*.json
 
 # VSCode and IDEs
 .vscode/
 .idea/
 
-# Images (optional)
-assets/*.webp
-assets/*.png
-assets/*.jpg
-assets/*.jpeg
 
