@@ -1,23 +1,47 @@
+import datetime
 import numpy as np 
 import pandas as pd 
 from joblib import load        
 import plotly.express as px  
 
-# Dash 
-import dash   
+# Dash  
+import plotly.graph_objects as go
+import dash_mantine_components as dmc
 import dash_bootstrap_components as dbc 
-from dash import Dash, html, dcc, Input, Output,State
+from dash import Dash, html, dcc, Input, Output, State, callback
+
+# User-Defined Modules
+from graphs import monthly_casualties
   
 
 
-#model = load('model.pkl')
 
 
+# Global Variables
+accidents_df = pd.read_csv('dataset/global_traffic_accidents.csv')
+accidents_df['City'] = accidents_df['Location'].map(lambda x:x.split(',')[0])
+accidents_df['Country'] = accidents_df['Location'].map(lambda x:x.split(',')[1])
 
+
+assessment_feature_columns = load(open('models/assessment_feature_columns.pkl', 'rb'))
+
+
+assessment_model = load('models/assessment_model.pkl')
+#casualties_forecast_model = load('models/casualties_forecast_model.pkl')
+#accidents_forecast_model = load('models/accidents_forecast_model.pkl')
+
+
+# Initialize the dash application
 app = Dash(__name__, external_stylesheets=[dbc.themes.COSMO], suppress_callback_exceptions=True)
 server = app.server
 
 
+
+# ----------------- Application Layouts ----------------- #
+
+
+
+# Sidebar Style
 sidebar_style = {
                     "position": "fixed",
                     "width": "20rem",
@@ -34,11 +58,11 @@ sidebar_style = {
                 }
 
 
-# Page Contenet Style
+# Page Content Style
 content_style = {
                     "margin-left": "16rem",
                     "margin-right": "0rem",
-                    "padding": "20px",
+                    "padding": "30px",
                     "height": "100%",
                     "background-color": "#f3f3f3",  # Light Grey
                 }
@@ -52,27 +76,6 @@ pages_dict = {
                 "Experiences": "/experinces",
                 "Forecast Accidents": "/TimeSeries"
             }
-
-
-
-# Modal Alert
-def get_alert(job_value, year_value):
-    return dbc.Alert(
-        [
-                html.H2("Warning", style={"font":"bold 30px tahoma"}),
-                html.P(
-                    f"The Job {job_value} Did Not Exist In {year_value} !!😔😔",
-                    style={"font":"bold 22px consolas"}
-                ),
-                html.Hr(),
-                html.P(
-                    "Choose Another Job",
-                    style={"font":"bold 20px arial"},
-                    className="mb-0",
-                ),
-            ], color="danger",
-        style={"box-shadow": "none", "text-shdow":"none"}
-    )
 
 
 
@@ -139,7 +142,8 @@ sidebar = html.Div(
 )
 
 
-header=  html.H1(f"", id="header", style={"text-align":"center"})
+# Application Header
+header =  html.H1(f"", id="header", style={"text-align":"center"})
 
 
 # page content
@@ -147,18 +151,21 @@ content = html.Div(id="page-content", children = [], style = content_style)
 
 
 # App Layout
-app.layout = html.Div([
-                        dcc.Location(id = "page-url"),
-                        sidebar,
-                        header,
-                        content,
-                      ], 
-                    className="container-fluid")
+app.layout = dmc.MantineProvider(
+                                    children=[
+                                        html.Div([
+                                                    dcc.Location(id="page-url"),
+                                                    sidebar,
+                                                    header,
+                                                    content,
+                                                ], className="container-fluid")
+                                    ]
+                                )
 
 
 
 
-# ----------------- Page Layouts ----------------- #
+# -------------------------------------------------- Pages Layouts -------------------------------------------------- #
 
 home_layout = html.Div([
     html.H2("Welcome to the Home Page"),
@@ -181,10 +188,268 @@ experiences_layout = html.Div([
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+# -------------------------------------------------- Forecasting Page Layout -------------------------------------------------- #
+
 forecast_layout = html.Div([
-    html.H2("Forecast Accidents Page"),
-    html.P("This page will show accident forecasting using time series models.")
-])
+
+    # Dropdown to select model type
+    html.Div([
+        html.Label("Choose A Task From Below:", style={"font-weight": "bold"}),
+        dcc.Dropdown(
+            id="model-dropdown",
+            options=[
+                {"label": "Assess Accident", "value": "assess_accident"},
+                {"label": "Forecast Global Casualties", "value": "forecast_casualties"},
+                {"label": "Forecast Global Accidents", "value": "forecast_accidents"}
+            ],
+            value="assess_accident",
+            clearable=False,
+            style={"width": "50%"}
+        )
+    ], style={"margin-bottom": "20px"}),
+
+    # Row with left and right sections
+    dbc.Row([
+
+        # Left: Large graph
+        dbc.Col(
+            dcc.Graph(id="main-forecast-graph"),
+            width=8
+        ),
+
+        # Right: Dynamic content (inputs or smaller graphs)
+        dbc.Col(
+            html.Div(id="right-column"),
+            width=4
+        )
+
+    ])
+
+], style={"padding": "70px"})
+
+
+
+
+
+
+
+
+
+@app.callback(
+    Output("main-forecast-graph", "figure"),
+    Output("right-column", "children"),
+    Input("model-dropdown", "value")
+)
+def update_forecast_layout(selected_model):
+
+    if selected_model == "forecast_casualties":
+        fig = monthly_casualties(accidents_df)
+        right_content = html.Div([
+            dcc.Graph(id="secondary-graph-1", figure=go.Figure().update_layout(title="Placeholder 1")),
+            html.Br(),
+            dcc.Graph(id="secondary-graph-2", figure=go.Figure().update_layout(title="Placeholder 2"))
+        ])
+        return fig, right_content
+
+    elif selected_model == "assess_accident":
+
+        fig = monthly_casualties(accidents_df)
+
+        #
+        right_content = html.Div([
+                                    html.H4("Accident Assessment Inputs", style={"fontWeight": "bold", "marginBottom": "20px"}),
+
+                                    html.Label("Select City", style={"fontWeight": "bold"}),
+                                    dcc.Dropdown(
+                                        options=[{'label': c, 'value': c} for c in sorted(accidents_df['City'].unique())],
+                                        id="city-dropdown"
+                                    ),
+                                    html.Br(),
+
+                                    html.Label("Select Country", style={"fontWeight": "bold"}),
+                                    dcc.Dropdown(
+                                        options=[{'label': c, 'value': c} for c in sorted(accidents_df['Country'].unique())],
+                                        id="country-dropdown"
+                                    ),
+                                    html.Br(),
+
+                                    html.Div([
+                                        html.Div([
+                                            html.Label("Longitude", style={"fontWeight": "bold"}),
+                                            dcc.Input(type="number", id="long-input", min=-180, step=0.01, value=12, style={"width": "100%"})
+                                        ], style={"width": "48%", "display": "inline-block", "marginRight": "4%"}),
+
+                                        html.Div([
+                                            html.Label("Latitude", style={"fontWeight": "bold"}),
+                                            dcc.Input(type="number", id="lat-input", min=-90, step=0.01, value=12, style={"width": "100%"})
+                                        ], style={"width": "48%", "display": "inline-block"})
+                                    ]),
+                                    html.Br(),
+
+                                    html.Label("Number of Vehicles Involved", style={"fontWeight": "bold"}),
+                                    dcc.Input(type="number", id="vehicles-input", min=1, step=1, value=12, style={"width": "100%"}),
+                                    html.Br(), html.Br(),
+
+                                    html.Label("Select Weather Condition", style={"fontWeight": "bold"}),
+                                    dcc.Dropdown(
+                                        options=[{'label': c, 'value': c} for c in sorted(accidents_df['Weather Condition'].unique())],
+                                        id="weather-dropdown"
+                                    ),
+                                    html.Br(),
+
+                                    html.Label("Select Road Condition", style={"fontWeight": "bold"}),
+                                    dcc.Dropdown(
+                                        options=[{'label': c, 'value': c} for c in sorted(accidents_df['Road Condition'].unique())],
+                                        id="road-dropdown"
+                                    ),
+                                    html.Br(),
+
+                                    html.Label("Select Cause", style={"fontWeight": "bold"}),
+                                    dcc.Dropdown(
+                                        options=[{'label': c, 'value': c} for c in sorted(accidents_df['Cause'].unique())],
+                                        id="cause-dropdown"
+                                    ),
+                                    html.Br(),
+
+                                    html.Div([
+                                        html.Div([
+                                            html.Label("Select Date", style={"fontWeight": "bold"}),
+                                            dcc.DatePickerSingle(
+                                                id="date-picker",
+                                                date=accidents_df['Date'].max(),
+                                                style={"width": "100%"}
+                                            )
+                                        ], style={"width": "48%", "display": "inline-block", "marginRight": "4%"}),
+
+
+                                    html.Div([
+                                                html.Label("Select Time", style={"fontWeight": "bold"}),
+                                                dmc.TimeInput(
+                                                    id="hour-input",
+                                                    withSeconds=False,
+                                                    style={"width": "100%"}
+                                                )
+                                            ], style={"width": "48%", "display": "inline-block"})
+
+                                    ]),
+                                    html.Br(), html.Br(),
+
+                                    html.Div(id="prediction-output", style={"marginTop": "20px", "fontSize": "20px", "color": "darkgreen", "fontWeight": "bold"}),
+
+                                    html.Div([
+                                        html.Button("Assess", id="submit-assess-btn", n_clicks=0, style={
+                                            "backgroundColor": "#007BFF",
+                                            "color": "white",
+                                            "border": "none",
+                                            "padding": "10px 24px",
+                                            "textAlign": "center",
+                                            "textDecoration": "none",
+                                            "display": "inline-block",
+                                            "fontSize": "16px",
+                                            "borderRadius": "6px",
+                                            "cursor": "pointer",
+                                            "width": "100%"
+                                        })
+                                    ])
+                                ], style={"padding": "20px", "fontFamily": "Arial, sans-serif"})
+
+        return fig, right_content
+
+    else:
+        return go.Figure().update_layout(title="No Data"), html.Div()
+
+
+
+
+
+@app.callback(
+    Output("prediction-output", "children"),
+    Input("submit-assess-btn", "n_clicks"),
+    State("city-dropdown", "value"),
+    State("country-dropdown", "value"),
+    State("lat-input", "value"),
+    State("long-input", "value"),
+    State("vehicles-input", "value"),
+    State("weather-dropdown", "value"),
+    State("road-dropdown", "value"),
+    State("cause-dropdown", "value"),
+    State("date-picker", "date"),
+    State("hour-input", "value"),
+    prevent_initial_call=True
+)
+def predict_casualties(n_clicks, city, country, lat, lon, vehicles, weather, road, cause, date, hour):
+
+    if not date:
+        return "Please select a date."
+
+    # Parse date
+    date_obj = datetime.datetime.strptime(date[:10], "%Y-%m-%d")
+    year, month, day = date_obj.year, date_obj.month, date_obj.day
+    day_of_week = date_obj.weekday()  # Monday = 0
+
+    # Cast hour
+    hour = pd.to_datetime(hour, format='%H:%M').hour
+
+
+    # Base data
+    input_data = {
+                    'Year': year,
+                    'Month': month,
+                    'Day': day,
+                    'DayOfWeek': day_of_week,
+                    'Hour': hour,
+                    'Latitude': lat,
+                    'Longitude': lon,
+                    'Vehicles Involved': vehicles
+                }
+
+    # One-hot encode city
+    for col in assessment_feature_columns:
+        if col.startswith("City_"):
+            input_data[col] = 1 if col == f"City_{city}" else 0
+
+    # One-hot encode country
+    for col in assessment_feature_columns:
+        if col.startswith("Country_"):
+            input_data[col] = 1 if col == f"Country_ {country}" else 0
+
+    # One-hot encode weather
+    for col in assessment_feature_columns:
+        if col.startswith("Weather Condition_"):
+            input_data[col] = 1 if col == f"Weather Condition_{weather}" else 0
+
+    # One-hot encode road
+    for col in assessment_feature_columns:
+        if col.startswith("Road Condition_"):
+            input_data[col] = 1 if col == f"Road Condition_{road}" else 0
+
+    # One-hot encode cause
+    for col in assessment_feature_columns:
+        if col.startswith("Cause_"):
+            input_data[col] = 1 if col == f"Cause_{cause}" else 0
+
+    # Convert to DataFrame
+    df_input = pd.DataFrame([input_data])
+    df_input = df_input.reindex(columns=assessment_feature_columns, fill_value=0)
+
+    # Predict
+    try:
+        prediction = assessment_model.predict(df_input)[0]
+        return f"Predicted Casualties: {prediction:.2f}"
+    
+    except Exception as e:
+        return f"Error during prediction: {str(e)}"
 
 
 
@@ -232,6 +497,7 @@ def display_page(pathname):
 
 
 # # ---------------- Home Page Graphs ----------------
+
 # def create_top_job_chart(year):
 
 #     if year == "all":
@@ -279,53 +545,6 @@ def display_page(pathname):
 
 
 
-
-
-# def create_high_salary_job_chart(year):
-
-#     if year == "all":
-#         df_filtered = df.copy()
-#     else:
-#         filt = df["Year"] == year
-#         df_filtered = df[filt].copy()
-
-#     df_filtered = df_filtered.groupby("Job_Title")["Salary_in_USD"].mean().sort_values(ascending=False).head(10)[::-1]
-
-#     # Bar Chart of Wanted Job
-#     fig_wanted_job = px.bar(df_filtered,
-#                  y = df_filtered.index ,
-#                  x = df_filtered ,
-#                  orientation="h",
-#                  color_discrete_sequence = ["#90CAF9"],
-#                  title= "Jobs of the Highest Average Salary",
-#                  labels={"Job_Title": "Job Title", "x": "AVG Salary (USD)"},
-#                  template="plotly",
-#                  text_auto = "0.3s"
-#                  )
-
-#     fig_wanted_job.update_layout(
-#         showlegend= False,
-#         title={
-#             "font": {
-#                 "size": 35,
-#                 "family": "tahoma",
-#             }
-#         }
-#     )
-
-#     fig_wanted_job.update_traces(
-#         textfont = {
-#                    "family": "consolas",
-#                    "size": 15,
-#                     "color":"white"
-#                    },
-#         hovertemplate="Job Title: %{label}<br>AVG Salary: %{value}",
-#     )
-
-#     return fig_wanted_job
-
-
-
 # def create_cards(year):
 
 #     if year == "all":
@@ -352,73 +571,6 @@ def display_page(pathname):
 
 
 
-
-
-
-
-# @app.callback(
-#                 Output("prediction-placeholder", "children"),
-#                 Input("deploy-button", "n_clicks"),
-#                 State("deploy-job-menu", "value"),
-#                 State("deploy-experience-menu", "value"),
-#                 State("deploy-education-menu", "value"),
-#                 State("deploy-company-size", "value"),
-#                 State("deploy-industry-menu", "value"),
-#                 State("deploy-location-menu", "value"),
-#                 State("deploy-experience-years", "value"),
-#             )
-
-# def deploy_and_predict_salary(n, job_title, experience_level, experience_years, company_size, employment_type, location, remote_ratio):
-
-#     if n is None:
-#         return ""
-    
-#     print(f"Button Clicked: {n}")
-#     print(f"Job Title: {job_title}")
-#     print(f"Experience Level: {experience_level}")
-#     print(f"Education Level: {experience_years}")
-#     print(f"Company Size: {company_size}")
-#     print(f"Industry: {employment_type}")
-#     print(f"Location: {location}")
-#     print(f"Experience Years: {remote_ratio}")
-  
-    
-#     try:
-#         # Construct input data as a DataFrame
-#         input_data = {
-#                         "work_year": [experience_years],
-#                         "experience_level": [experience_level],
-#                         "employment_type": [employment_type],
-#                         "job_title": [job_title],
-#                         "salary_currency": [location],
-#                         "remote_ratio": [remote_ratio],
-#                         "company_size": [company_size]
-#                     }
-
-#         input_df = pd.DataFrame(input_data)
-
-#         # Load the preprocessor pipeline
-#         preprocessor = load('preprocessor_pipeline.pkl')
-
-#         # Transform input data using the preprocessor pipeline
-#         transformed_data = preprocessor.transform(input_df)
-
-#         print(f"Input Data: {transformed_data}")
-
-#         # Reshape transformed data to 2D array
-#         transformed_data = transformed_data.reshape(1, -1)
-
-#         # Predict salary
-#         y_pred = model.predict(transformed_data)[0]
-
-#         print(f"Predicted Salary: ${y_pred:,.2f}")
-
-#         return html.Div(html.Div(f"Predicted Salary: ${y_pred:,.2f}", style={"color": "red"}))
-
-#     except Exception as e:
-#         #print(f"Error predicting salary: {e}")
-#         #return f"Error predicting salary: {e}"
-#         pass
 
 
 if __name__ == "__main__":
