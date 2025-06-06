@@ -446,7 +446,7 @@ def predict_casualties(n_clicks, city, country, lat, lon, vehicles, weather, roa
     # Predict
     try:
         prediction = assessment_model.predict(df_input)[0]
-        return f"Predicted Casualties: {prediction:.2f}"
+        return f"Predicted Casualties: {int(prediction)}"
     
     except Exception as e:
         return f"Error during prediction: {str(e)}"
