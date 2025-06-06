@@ -184,11 +184,39 @@ header_trends=html.Div([
                className="lead"),
     ], className="text-center mb-4"),
 
-        
+
+
+def determine_severity(row):
+    if row['Casualties'] >= 4 or row['Vehicles Involved'] >= 4:
+        return 'Severe'
+    elif 2 <= row['Casualties'] <= 3 and row['Vehicles Involved'] <= 3:
+        return 'Moderate'
+    else:
+        return 'Minor'
+
+def create_severity_figure():
+    sever_df=accidents_df.copy()
+    sever_df['Severity'] = accidents_df.apply(determine_severity, axis=1)
+    severity_counts = sever_df['Severity'].value_counts().reset_index()
+    severity_counts.columns = ['Severity', 'Count']
+
+    fig = px.pie(
+        severity_counts,
+        names='Severity',
+        values='Count',
+        color='Severity',
+        color_discrete_map={
+            'Minor': '#36454f',
+            'Moderate': '#001f3f',
+            'Severe': '#800020'
+        }
+    )
+    return fig
+       
 trends_layout = html.Div([
     html.Div([
-        dbc.Row(children=[
             dbc.Card([
+                html.H5("Accident Trends Over Time", className="card-title text-center mt-3"),
                  dcc.DatePickerRange(   
                     id='date-range',
                     start_date=accidents_df['Date'].min(),
@@ -206,15 +234,14 @@ trends_layout = html.Div([
                 
                 dcc.Graph(id='time-series'),
             ],className="mb-4 p-3",style={"border": "1px solid #001f3f","borderRadius": "20px","margin-left":"80px","margin-bottom":"20px","width":"1100px"}),
-        ]),
-        dbc.Col([
-            dbc.Card([
-            html.H5("Casualties by Environment", className="card-title text-center mt-3"),
+          dbc.Card([
+            html.Div(id='env-title', className="card-title text-center mt-3"),
             dcc.Dropdown(
                 id='env-dropdown',
                 options=[
                     {'label': 'Weather Condition', 'value': 'Weather Condition'},
-                    {'label': 'Road Condition', 'value': 'Road Condition'}
+                    {'label': 'Road Condition', 'value': 'Road Condition'},
+                     {'label': 'Cause of accidents', 'value': 'Cause'},
                 ],
                 value='Weather Condition',
                 clearable=False,
@@ -222,8 +249,16 @@ trends_layout = html.Div([
             ),
             dcc.Graph(id='env-boxplot')
         ], className="mb-4 p-3",style={"border": "1px solid #001f3f","borderRadius": "20px","margin-left":"80px","margin-bottom":"20px",}),
-           
-        ]), 
+       
+        dbc.Row(children=[
+        dbc.Card([
+           html.H5("Accident Severity (Based on Casualties & Vehicles)", className="card-title text-center mt-3"),
+            dcc.Graph(figure=create_severity_figure())
+        ], className="mb-4 p-3",style={"border": "1px solid #001f3f","borderRadius": "20px","margin-left":"80px","margin-bottom":"20px","width":"1100px"}),
+       
+        ]),
+        
+        
     ])
 ])
 
@@ -242,9 +277,10 @@ def update_time_series(start_date, end_date):
 
     # Create figure
     fig = px.line(grouped, x='Date', y='accident_count',
-                  title='Accident Trends Over Time',
                   labels={'accident_count': 'Number of Accidents'},
-                  template='plotly_white')
+                  template='plotly_white',
+                  color_discrete_sequence=['#001f3f']
+                  )
     fig.update_traces(mode='lines+markers')
     return fig
 
@@ -259,16 +295,27 @@ def update_env_plot(selected_feature):
 
     # Create bar chart
     fig = px.bar(
-        grouped_df,
-        x=selected_feature,
-        y='Number of Accidents',
-         
-        labels={'Number of Accidents': 'Number of Accidents'},
-
-
-    )
+    grouped_df,
+    x=selected_feature,
+    y='Number of Accidents',
+    color=selected_feature,  # this is the key part!
+    color_discrete_sequence=['#1e2d3b', '#36454f', '#3e78b2', '#003366', '#001f3f','#3a6d8c'],
+    labels={'Number of Accidents': 'Number of Accidents'}
+     )
     fig.update_layout(showlegend=False)
     return fig
+
+@callback(
+    Output('env-title', 'children'),
+    Input('env-dropdown', 'value')
+)
+def update_env_title(selected_feature):
+    feature_map = {
+        "Weather Condition": "Accidents by Weather Condition",
+        "Road Condition": "Accidents by Road Condition",
+        "Cause": "Accidents by Cause"
+    }
+    return html.H5(feature_map.get(selected_feature, "Accident Analysis"), className="mt-3")
 
 
 #------------------------------------------------------------------------------------------
