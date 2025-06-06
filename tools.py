@@ -1,78 +1,34 @@
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.express as px
 
 
 
-# # Model Alert
-# def get_alert(job_value, year_value):
-#     return dbc.Alert(
-#         [
-#                 html.H2("Warning", style={"font":"bold 30px tahoma"}),
-#                 html.P(
-#                     f"The Job {job_value} Did Not Exist In {year_value} !!😔😔",
-#                     style={"font":"bold 22px consolas"}
-#                 ),
-#                 html.Hr(),
-#                 html.P(
-#                     "Choose Another Job",
-#                     style={"font":"bold 20px arial"},
-#                     className="mb-0",
-#                 ),
-#             ], color="danger",
-#         style={"box-shadow": "none", "text-shdow":"none"}
-#     )
 
+def monthly_casualties(accidents_df):
 
-def plot_series(x_data, y_data, title, x_label, y_label, labels=[], linestyles=[]):
+    # Convert to datetime and extract YearMonth
+    accidents_df['Date'] = pd.to_datetime(accidents_df['Date'])
+    accidents_df['YearMonth'] = accidents_df['Date'].dt.to_period('M')
 
-    """
-    Plots multiple time series on the same figure.
+    # Group by YearMonth and sum casualties
+    monthly_counts = accidents_df.groupby('YearMonth')['Casualties'].sum().reset_index()
 
-    Args:
-      x_data : list of array-like
-          List containing x-axis data for each series (e.g., list of datetime arrays).
-      
-      y_data : list of array-like
-          List containing y-axis data for each series (e.g., casualties, counts, etc.).
-      
-      title : str
-          Title of the plot.
-      
-      x_label : str
-          Label for the x-axis.
-      
-      y_label : str
-          Label for the y-axis.
-      
-      labels : list of str, optional
-          List of labels for each series (for the legend). Default is an empty list.
-      
-      linestyles : list of str, optional
-          List of line styles for each series (e.g., '-', '--', '-.', ':'). Default is an empty list.
+    # Convert YearMonth to timestamp
+    monthly_counts['YearMonth'] = monthly_counts['YearMonth'].dt.to_timestamp()
 
-    Returns:
-      None
-          Displays the plot.
-    """
+    # Create and return Plotly figure
+    fig = px.line(
+                    monthly_counts,
+                    x='YearMonth',
+                    y='Casualties',
+                    title='Monthly Casualties',
+                    markers=True,
+                    labels={'YearMonth': 'Month', 'Casualties': 'Number of Casualties'}
+                )
+    fig.update_traces(line=dict(dash='solid'))
+    fig.update_layout(template='plotly_white')
 
-    # Single figure for all lines
-    plt.figure(figsize=(12,6))
-
-    # Plot Individual lines
-    for x, y, label, line_style in zip(x_data, y_data, labels, linestyles):
-
-        plt.plot(x, y, marker='o', label=label, linestyle=line_style)
-
-    # Set Title & Axes Labels
-    plt.title(title)
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-
-    # Display the Plot
-    plt.grid(True)
-    plt.show()
-
-
+    return fig
 
 
 
@@ -140,3 +96,75 @@ def forecast_interval(model, monthly_counts, n_forecast, last_known):
     future_dates = pd.date_range(start=last_date + pd.offsets.MonthBegin(1), periods=n_forecast, freq='MS')
 
     return future_dates, future_predictions
+
+
+
+
+
+
+
+def get_casualties_features(accidents_df):
+
+    #
+    accidents_df_copy = accidents_df.copy()
+
+    #
+    accidents_df_copy['Date'] = pd.to_datetime(accidents_df_copy['Date'])
+    accidents_df_copy['YearMonth'] = accidents_df_copy['Date'].dt.to_period('M')
+
+    # Group by YearMonth and sum casualties
+    monthly_counts = accidents_df_copy.groupby('YearMonth')['Casualties'].sum().reset_index()
+
+    # Convert YearMonth to timestamp
+    monthly_counts['YearMonth'] = monthly_counts['YearMonth'].dt.to_timestamp()
+
+    # Create lag features (previous 3 months)
+    for lag in range(1, 4):
+        monthly_counts[f'lag_{lag}'] = monthly_counts['Casualties'].shift(lag)
+
+    # Drop rows with NaN values created by shifting
+    monthly_counts = monthly_counts.dropna().reset_index(drop=True)
+
+
+    #
+    last_known = monthly_counts[['Casualties']].tail(3)['Casualties'].values.tolist()
+    
+    #
+    return monthly_counts, last_known
+    
+
+
+
+
+
+
+
+
+def get_accidents_features(accidents_df):
+    
+    #
+    accidents_df_copy = accidents_df.copy()
+
+    #
+    accidents_df_copy['Date'] = pd.to_datetime(accidents_df_copy['Date'])
+    accidents_df_copy['YearMonth'] = accidents_df_copy['Date'].dt.to_period('M')
+
+    # Group by YearMonth and count accidents (Accident ID count or rows count)
+    monthly_counts = accidents_df_copy.groupby('YearMonth').size().reset_index(name='AccidentsCount')
+
+    # Convert YearMonth back to datetime for plotting
+    monthly_counts['YearMonth'] = monthly_counts['YearMonth'].dt.to_timestamp()
+
+    # Create lag features (previous 3 months)
+    for lag in range(1, 4):
+        monthly_counts[f'lag_{lag}'] = monthly_counts['AccidentsCount'].shift(lag)
+
+    # Drop rows with NaN values created by shifting
+    monthly_counts = monthly_counts.dropna().reset_index(drop=True)
+
+    #
+    last_known = monthly_counts[['AccidentsCount']].tail(3)['AccidentsCount'].values.tolist()
+
+
+    #
+    return monthly_counts, last_known

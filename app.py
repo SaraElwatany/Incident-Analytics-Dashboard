@@ -13,7 +13,7 @@ import dash_bootstrap_components as dbc
 from dash import Dash, html, dcc, Input, Output, State, callback
 
 # User-Defined Modules
-from graphs import monthly_casualties
+from tools import monthly_casualties, forecast_interval, get_casualties_features, get_accidents_features
   
 
 
@@ -31,8 +31,8 @@ assessment_feature_columns = load(open('models/assessment_feature_columns.pkl', 
 
 
 assessment_model = load('models/assessment_model.pkl')
-#casualties_forecast_model = load('models/casualties_forecast_model.pkl')
-#accidents_forecast_model = load('models/accidents_forecast_model.pkl')
+casualties_forecast_model = load('models/casualties_forecasting_model.pkl')
+accidents_forecast_model = load('models/accidents_forecasting_model.pkl')
 
 
 # Initialize the dash application
@@ -79,7 +79,7 @@ pages_dict = {
                 "Trends": "/trends",
                 "Experiences": "/experinces",
                 "Forecast Accidents": "/TimeSeries"
-            }
+             }
 
 
 
@@ -391,14 +391,41 @@ forecast_layout = html.Div([
 )
 def update_forecast_layout(selected_model):
 
-    if selected_model == "forecast_casualties":
-        fig = monthly_casualties(accidents_df)
+
+
+    if selected_model in ["forecast_casualties", "forecast_accidents"]:
+
+        fig = go.Figure().update_layout(title="Forecast will appear here...")
+
         right_content = html.Div([
-            dcc.Graph(id="secondary-graph-1", figure=go.Figure().update_layout(title="Placeholder 1")),
-            html.Br(),
-            dcc.Graph(id="secondary-graph-2", figure=go.Figure().update_layout(title="Placeholder 2"))
-        ])
+                                    html.Label("Number of Months to Forecast", style={"fontWeight": "bold"}),
+                                    
+                                    dcc.Slider(
+                                                id="month-slider",
+                                                min=1,
+                                                max=12,
+                                                step=1,
+                                                value=1,
+                                                marks={i: f"{i}" for i in range(1, 13)},
+                                            ),
+
+                                    html.Br(),
+
+                                    html.Button("Forecast", id="forecast-btn", n_clicks=0, style={
+                                                                                                    "backgroundColor": "#28a745",
+                                                                                                    "color": "white",
+                                                                                                    "border": "none",
+                                                                                                    "padding": "10px 24px",
+                                                                                                    "fontSize": "16px",
+                                                                                                    "borderRadius": "6px",
+                                                                                                    "cursor": "pointer",
+                                                                                                    "width": "100%"
+                                                                                                }),
+                                ], style={"padding": "20px"})
+
         return fig, right_content
+
+    
 
     elif selected_model == "assess_accident":
 
@@ -487,7 +514,7 @@ def update_forecast_layout(selected_model):
 
                                     html.Div([
                                         html.Button("Assess", id="submit-assess-btn", n_clicks=0, style={
-                                            "backgroundColor": "#007BFF",
+                                            "backgroundColor": "#28a745",
                                             "color": "white",
                                             "border": "none",
                                             "padding": "10px 24px",
@@ -594,6 +621,51 @@ def predict_casualties(n_clicks, city, country, lat, lon, vehicles, weather, roa
 
 
 
+
+@app.callback(
+    Output("main-forecast-graph", "figure", allow_duplicate=True),
+    Input("forecast-btn", "n_clicks"),
+    State("month-slider", "value"),
+    State("model-dropdown", "value"),
+    prevent_initial_call=True
+)
+def generate_forecast(n_clicks, months, model_type):
+
+    if model_type == "forecast_accidents":
+
+        # 
+        monthly_counts, last_known = get_accidents_features(accidents_df)
+        future_dates, future_predictions = forecast_interval(accidents_forecast_model, monthly_counts, months, last_known)
+        x_col, y_col = monthly_counts['YearMonth'], monthly_counts['AccidentsCount']
+        title = 'Accidents'
+
+    elif model_type == "forecast_casualties":
+
+        #
+        monthly_counts, last_known = get_casualties_features(accidents_df)
+        future_dates, future_predictions = forecast_interval(casualties_forecast_model, monthly_counts, months, last_known)
+        x_col, y_col = monthly_counts['YearMonth'], monthly_counts['Casualties']
+        title = 'Casualties'
+
+    else:
+        return go.Figure().update_layout(title="Invalid Model Selection")
+
+    # Plotting forecast
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=x_col, y=y_col, mode='lines+markers', name='Historical'))
+    fig.add_trace(go.Scatter(x=future_dates, y=future_predictions, mode='lines+markers', name='Forecast'))
+    fig.update_layout(title='Monthly Forecast', xaxis_title='Date', yaxis_title=title)
+
+    return fig
+
+
+
+
+
+
+
+
+
 @app.callback(
     Output("page-content", "children"),
     Output("header", "children"),
@@ -610,100 +682,6 @@ def display_page(pathname):
         return forecast_layout, "Forecast Accidents"
     else:
         return html.Div([html.H2("404 - Page Not Found")]), "Not Found"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # ---------------- Home Page Graphs ----------------
-
-# def create_top_job_chart(year):
-
-#     if year == "all":
-#         df_filtered = df.copy()
-
-#     else:
-#         filt = df["Year"] == year  # df[df["Year"] == year]
-#         df_filtered = df[filt].copy()
-
-#     df_filtered = df_filtered["Job_Title"].value_counts().sort_values(ascending=False).head(10)[::-1]
-
-#     # Bar Chart of Wanted Job
-#     fig_wanted_job = px.bar(df_filtered,
-#                  orientation="h",
-#                  y = df_filtered.index ,
-#                  x = (df_filtered / sum(df_filtered)) * 100,
-#                  # color = df_filtered.index,
-#                  color_discrete_sequence=["#90CAF9"],
-#                  title= "Top Demanded Job",
-#                  labels={"x": "Popularity of Jobs(%)", "Job_Title": "Job Title"},
-#                  template="plotly",
-#                  text = df_filtered.apply(lambda x: f"{(x / sum(df_filtered)) * 100:0.2f}%")
-#                  )
-
-#     fig_wanted_job.update_layout(
-#         showlegend= False,
-#         title={
-#             "font": {
-#                 "size": 35,
-#                 "family": "tahoma",
-#             }
-#         }
-#     )
-
-#     fig_wanted_job.update_traces(
-#         textfont = {
-#                    "family": "consolas",
-#                    "size": 14,
-#                     "color":"white"
-#                    },
-#         hovertemplate="Job Title: %{label}<br>Popularity (%): %{value}",
-#     )
-
-#     return fig_wanted_job
-
-
-
-# def create_cards(year):
-
-#     if year == "all":
-#         df_filtered = df.copy()
-#     else:
-#         filt = df["Year"] == year
-#         df_filtered = df[filt].copy()
-
-#     all_jobs = df_filtered["Job_Title"].nunique()
-#     avg_salary = df_filtered["Salary_in_USD"].mean()
-#     avg_salary = f"${avg_salary:0,.0f}"
-
-
-#     return [all_jobs, avg_salary]
-
-
-
-
-
-
-
 
 
 
