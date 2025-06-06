@@ -1,4 +1,6 @@
 import datetime
+from dash_bootstrap_components._components.Card import Card
+from dash_bootstrap_components._components.Row import Row
 import numpy as np 
 import pandas as pd 
 from joblib import load        
@@ -21,6 +23,8 @@ from graphs import monthly_casualties
 accidents_df = pd.read_csv('dataset/global_traffic_accidents.csv')
 accidents_df['City'] = accidents_df['Location'].map(lambda x:x.split(',')[0])
 accidents_df['Country'] = accidents_df['Location'].map(lambda x:x.split(',')[1])
+accidents_df['Date'] = pd.to_datetime(accidents_df['Date'])
+accidents_df['Time']=pd.to_datetime(accidents_df['Time'],format='%H:%M').dt.time
 
 
 assessment_feature_columns = load(open('models/assessment_feature_columns.pkl', 'rb'))
@@ -72,7 +76,7 @@ content_style = {
 # Pages Navigator
 pages_dict = {
                 "Home" : "/",
-                "Locations": "/Locations",
+                "Trends": "/trends",
                 "Experiences": "/experinces",
                 "Forecast Accidents": "/TimeSeries"
             }
@@ -173,14 +177,101 @@ home_layout = html.Div([
 ])
 
 
+# -------------------------------------------------- Trends & insights layout -------------------------------------------------- #
+header_trends=html.Div([
+        html.H2("🚗 Accident Characteristics & Trends", className="mt-4"),
+        html.P("Deep dive into temporal patterns, environmental factors, and accident severity analysis", 
+               className="lead"),
+    ], className="text-center mb-4"),
 
-locations_layout = html.Div([
-    html.H2("Locations Page"),
-    html.P("View and explore incidents by location.")
+        
+trends_layout = html.Div([
+    html.Div([
+        dbc.Row(children=[
+            dbc.Card([
+                 dcc.DatePickerRange(   
+                    id='date-range',
+                    start_date=accidents_df['Date'].min(),
+                    end_date=accidents_df['Date'].max(),
+                    min_date_allowed=accidents_df['Date'].min(),
+                    max_date_allowed=accidents_df['Date'].max(),
+                    display_format='YYYY-MM-DD',
+                    style={
+                          
+                        "borderRadius": "2px",
+                        "margin":"10px",
+                        "color": "#001f3f"                   
+                    }
+                ),
+                
+                dcc.Graph(id='time-series'),
+            ],className="mb-4 p-3",style={"border": "1px solid #001f3f","borderRadius": "20px","margin-left":"80px","margin-bottom":"20px","width":"1100px"}),
+        ]),
+        dbc.Col([
+            dbc.Card([
+            html.H5("Casualties by Environment", className="card-title text-center mt-3"),
+            dcc.Dropdown(
+                id='env-dropdown',
+                options=[
+                    {'label': 'Weather Condition', 'value': 'Weather Condition'},
+                    {'label': 'Road Condition', 'value': 'Road Condition'}
+                ],
+                value='Weather Condition',
+                clearable=False,
+                style={"margin": "10px"}
+            ),
+            dcc.Graph(id='env-boxplot')
+        ], className="mb-4 p-3",style={"border": "1px solid #001f3f","borderRadius": "20px","margin-left":"80px","margin-bottom":"20px",}),
+           
+        ]), 
+    ])
 ])
 
+@callback(
+    Output('time-series', 'figure'),
+    Input('date-range', 'start_date'),
+    Input('date-range', 'end_date')
+)
+def update_time_series(start_date, end_date):
+    # Filter dataset
+    mask = (accidents_df['Date'] >= start_date) & (accidents_df['Date'] <= end_date)
+    filtered_data = accidents_df.loc[mask]
+
+    # Group by date
+    grouped = filtered_data.groupby('Date').size().reset_index(name='accident_count')
+
+    # Create figure
+    fig = px.line(grouped, x='Date', y='accident_count',
+                  title='Accident Trends Over Time',
+                  labels={'accident_count': 'Number of Accidents'},
+                  template='plotly_white')
+    fig.update_traces(mode='lines+markers')
+    return fig
+
+@callback(
+    Output('env-boxplot', 'figure'),
+    Input('env-dropdown', 'value')
+)
+def update_env_plot(selected_feature):
+    # Count number of accidents per category
+    grouped_df = accidents_df[selected_feature].value_counts().reset_index()
+    grouped_df.columns = [selected_feature, 'Number of Accidents']
+
+    # Create bar chart
+    fig = px.bar(
+        grouped_df,
+        x=selected_feature,
+        y='Number of Accidents',
+         
+        labels={'Number of Accidents': 'Number of Accidents'},
 
 
+    )
+    fig.update_layout(showlegend=False)
+    return fig
+
+
+#------------------------------------------------------------------------------------------
 experiences_layout = html.Div([
     html.H2("Experiences Page"),
     html.P("This page contains user experiences or analysis.")
@@ -464,8 +555,8 @@ def predict_casualties(n_clicks, city, country, lat, lon, vehicles, weather, roa
 def display_page(pathname):
     if pathname == "/":
         return home_layout, "Home"
-    elif pathname == "/Locations":
-        return locations_layout, "Locations"
+    elif pathname == "/trends":
+        return trends_layout,header_trends 
     elif pathname == "/experinces":
         return experiences_layout, "Experiences"
     elif pathname == "/TimeSeries":
