@@ -79,7 +79,7 @@ def create_accidents_with_time():
 trends_layout = html.Div([
     html.Div([
             dbc.Card([
-                html.H5("Accident Trends Over Time", className="card-title text-center mt-3"),
+                html.H5("Accident Trends Over Time", className="card-title text-center mt-3",style={'fontWeight': 'bold'}),
                  dcc.DatePickerRange(   
                     id='date-range',
                     start_date=accidents_df['Date'].min(),
@@ -107,58 +107,54 @@ trends_layout = html.Div([
                      {'label': 'Cause of accidents', 'value': 'Cause'},
                 ],
                 value='Weather Condition',
-                clearable=False,
-                style={"margin": "10px"}
+                #clearable=False,
+                style={
+                    "margin": "10px",
+                    }
             ),
             dcc.Graph(id='env-boxplot')
         ], className="mb-4 p-3",style={"border": "1px solid #001f3f","borderRadius": "20px","margin-left":"80px","margin-bottom":"20px",}),
         dbc.Card([
-            html.H5("Casualties in 2023 vs Casualties in 2024 Monthly Trend", className="card-title text-center mt-3"),
+            html.H5("Casualties in 2023 vs Casualties in 2024 Monthly Trend", className="card-title text-center mt-3",style={'fontWeight': 'bold'}),
                 dcc.Tabs(
                     id='metric-selector',
                     value='Casualties',
                     children=[
                         dcc.Tab(label='Casualties', value='Casualties', 
                                 style={
-                                    'border': '1px solid #ccc',
+                                    'border': '2px solid #001f3f',
+                                    'border-radius': "25px",
                                     'padding': '10px',
                                     'fontWeight': 'bold',
-                                    'backgroundColor': '#f9f9f9',
+                                    'width':'200px',
+                                    'margin': '5px',
                                 },
                                 selected_style={
-                                    'borderTop': '3px solid #0074D9',
-                                    'borderLeft': '1px solid #ccc',
-                                    'borderRight': '1px solid #ccc',
-                                    'borderBottom': 'none',
+                                     'border': '2px solid #001f3f',
+                                    'border-radius': "25px",
                                     'padding': '10px',
                                     'fontWeight': 'bold',
-                                    'borderRadius': '8px',
-                                    'backgroundColor': '#ffffff'
+                                     'width':'200px',
+                                     'margin': '5px',
                                 }),
                         dcc.Tab(label='Vehicles Involved', value='Vehicles Involved', 
                                 style={
-                                    'border': '1px solid #ccc',
+                                    'border': '2px solid #001f3f',
+                                    'border-radius': "25px",
                                     'padding': '10px',
                                     'fontWeight': 'bold',
-                                     'borderRadius': '8px',
-                                    'backgroundColor': '#f9f9f9',
+                                    'width':'200px',
+                                    'margin': '5px',
                                 },
                                 selected_style={
-                                    'borderTop': '3px solid #0074D9',
-                                    'borderLeft': '1px solid #ccc',
-                                    'borderRight': '1px solid #ccc',
-                                    'borderBottom': 'none',
+                                    'border': '2px solid #001f3f',
+                                    'border-radius': "25px",
                                     'padding': '10px',
                                     'fontWeight': 'bold',
-                                   
-                                    'backgroundColor': '#ffffff'
+                                    'width':'200px',
+                                    'margin': '5px',
                                 })
                     ],
-                    parent_style={
-                        'marginTop': '20px',
-                        'borderBottom': '1px solid #ccc',
-                        'backgroundColor': '#f2f2f2'
-                    }
                 ),
 
                 dcc.Graph(id='monthly-trend-graph')
@@ -167,14 +163,14 @@ trends_layout = html.Div([
         dbc.Row(children=[
             dbc.Col([
                 dbc.Card([
-                    html.H5("Accident Severity (Based on Casualties & Vehicles)", className="card-title text-center mt-3"),
+                    html.H5("Accident Severity (Based on Casualties & Vehicles)", className="card-title text-center mt-3",style={'fontWeight': 'bold'}),
                         dcc.Graph(figure=create_severity_figure())
                     ], className="mb-4 p-3",style={"border": "1px solid #001f3f","borderRadius": "20px","margin-left":"80px","margin-bottom":"20px",}),
                
             ]),
             dbc.Col([
                dbc.Card([
-            html.H5("Accidents by Time of Day", className="card-title text-center mt-3"),
+            html.H5("Accidents by Time of Day", className="card-title text-center mt-3",style={'fontWeight': 'bold'}),
                 dcc.Graph(figure=create_accidents_with_time())
             ], className="mb-4 p-3",style={"border": "1px solid #001f3f","borderRadius": "20px","margin-left":"80px","margin-bottom":"20px",}),
         
@@ -233,7 +229,7 @@ def update_env_title(selected_feature):
         "Road Condition": "Accidents by Road Condition",
         "Cause": "Accidents by Cause"
     }
-    return html.H5(feature_map.get(selected_feature, "Accident Analysis"), className="mt-3")
+    return html.H5(feature_map.get(selected_feature, "Accident Analysis"), className="mt-3",style={'fontWeight': 'bold'})
 
 
 @callback(
