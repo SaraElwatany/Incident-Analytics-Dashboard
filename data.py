@@ -10,6 +10,7 @@ def determine_severity(row):
         return 'Minor'
 
 
+
 def get_time_segment(hour):
     if 5 <= hour < 12:
         return 'Morning'
@@ -30,4 +31,5 @@ def data_preprocess(path):
     accidents_df['Hour'] = pd.to_datetime(accidents_df['Time'], format='%H:%M').dt.hour
     accidents_df['Time Segment'] = accidents_df['Hour'].apply(get_time_segment)
     accidents_df['Severity'] = accidents_df.apply(determine_severity, axis=1)
+    accidents_df['YearMonth'] = accidents_df['Date'].dt.to_period('M')
     return accidents_df

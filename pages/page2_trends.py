@@ -1,17 +1,21 @@
+import pandas as pd
+import plotly.express as px 
 import dash_bootstrap_components as dbc 
 from dash import html, dcc, Input, Output, callback
 from dash_bootstrap_components._components.Col import Col
-import plotly.express as px 
-from data import data_preprocess
-import pandas as pd
 
-accidents_df=data_preprocess('dataset\global_traffic_accidents.csv')
+from data import data_preprocess
+
+
+
+accidents_df = data_preprocess('dataset\global_traffic_accidents.csv')
+
 
 header_trends=html.Div([
-        html.H2("🚗 Accident Characteristics & Trends", className="mt-4"),
-        html.P("Deep dive into temporal patterns, environmental factors, and accident severity analysis", 
-               className="lead"),
-    ], className="text-center mb-4"),
+                        html.H2("🚗 Accident Characteristics & Trends", className="mt-4"),
+                        html.P("Deep dive into temporal patterns, environmental factors, and accident severity analysis", 
+                            className="lead"),
+                    ], className="text-center mb-4"),
 
 
 

@@ -6,9 +6,29 @@ import plotly.express as px
 
 def monthly_casualties(accidents_df):
 
-    # Convert to datetime and extract YearMonth
-    accidents_df['Date'] = pd.to_datetime(accidents_df['Date'])
-    accidents_df['YearMonth'] = accidents_df['Date'].dt.to_period('M')
+    """
+    Plot the total number of casualties per month.
+
+    This function groups accident data by month and sums the number of casualties.
+    It then returns a Plotly line chart to visualize monthly global casualties over time.
+
+    Args:
+
+    accidents_df : pandas.DataFrame
+        The original DataFrame containing accident records, including a 'YearMonth' column
+        (as a pandas Period or datetime-like) and a 'Casualties' column.
+
+    Returns:
+
+    fig : plotly.graph_objs._figure.Figure
+        A Plotly figure object showing the number of casualties per month as a line chart.
+
+    Notes
+    -----
+    - The function converts 'YearMonth' to timestamp format for plotting.
+    - It is intended for descriptive visualization of casualty trends.
+    """
+
 
     # Group by YearMonth and sum casualties
     monthly_counts = accidents_df.groupby('YearMonth')['Casualties'].sum().reset_index()
@@ -25,6 +45,7 @@ def monthly_casualties(accidents_df):
                     markers=True,
                     labels={'YearMonth': 'Month', 'Casualties': 'Number of Casualties'}
                 )
+    
     fig.update_traces(line=dict(dash='solid'))
     fig.update_layout(template='plotly_white')
 
@@ -105,12 +126,39 @@ def forecast_interval(model, monthly_counts, n_forecast, last_known):
 
 def get_casualties_features(accidents_df):
 
-    #
-    accidents_df_copy = accidents_df.copy()
+    """
+    Generate lagged features from monthly casualty counts.
 
-    #
-    accidents_df_copy['Date'] = pd.to_datetime(accidents_df_copy['Date'])
-    accidents_df_copy['YearMonth'] = accidents_df_copy['Date'].dt.to_period('M')
+    This function:
+    - Aggregates casualty counts by month,
+    - Creates lag features for the previous 3 months,
+    - Drops rows with NaN values resulting from lagging,
+    - Extracts the most recent 3 casualty values for forecasting.
+
+    Args:
+
+    accidents_df : pandas.DataFrame
+        The original DataFrame containing accident records, including a 'YearMonth' column
+        (as pandas Period or datetime-like) and a 'Casualties' column.
+
+    Returns:
+
+    monthly_counts : pandas.DataFrame
+        A DataFrame with the total casualties per month and additional lag features
+        ('lag_1', 'lag_2', 'lag_3').
+
+    last_known : list of float
+        A list containing the last 3 known monthly casualty counts for forecasting input.
+
+    Notes
+    -----
+    - This function prepares the data for time series forecasting using autoregressive models.
+    - The 'YearMonth' column is converted to timestamps for consistency.
+    """
+
+    # Create Copy of the dataframe
+    accidents_df_copy = accidents_df.copy()
+    
 
     # Group by YearMonth and sum casualties
     monthly_counts = accidents_df_copy.groupby('YearMonth')['Casualties'].sum().reset_index()
@@ -126,10 +174,10 @@ def get_casualties_features(accidents_df):
     monthly_counts = monthly_counts.dropna().reset_index(drop=True)
 
 
-    #
+    # Get the last known casualties count (historical data)
     last_known = monthly_counts[['Casualties']].tail(3)['Casualties'].values.tolist()
     
-    #
+    
     return monthly_counts, last_known
     
 
@@ -141,13 +189,43 @@ def get_casualties_features(accidents_df):
 
 
 def get_accidents_features(accidents_df):
+
+    """
+    Generate lagged features from monthly accident counts.
+
+    This function processes the accident dataset to:
+    - Group the accident data by month,
+    - Count the number of accidents per month,
+    - Generate lag features (1-month, 2-month, and 3-month lags),
+    - Return a DataFrame of these monthly counts with lags,
+    - Extract the most recent 3 accident counts for forecasting.
+
+    Args:
+
+    accidents_df : pandas.DataFrame
+        The original DataFrame containing individual accident records with a 
+        'YearMonth' column (must be in a datetime-like format).
+
+    Returns:
+
+    monthly_counts : pandas.DataFrame
+        A DataFrame containing the number of accidents per month and lagged
+        features (lag_1, lag_2, lag_3).
+
+    last_known : list of float
+        A list containing the last 3 known monthly accident counts, to be used 
+        as input for time series forecasting.
+
+    Notes
+    -----
+    - The function assumes the 'YearMonth' column is a pandas Period or datetime 
+      and can be converted using `.dt.to_timestamp()`.
+    - Rows with NaN values due to lagging are dropped.
+    """
     
-    #
+    # Create Copy of the dataframe
     accidents_df_copy = accidents_df.copy()
 
-    #
-    accidents_df_copy['Date'] = pd.to_datetime(accidents_df_copy['Date'])
-    accidents_df_copy['YearMonth'] = accidents_df_copy['Date'].dt.to_period('M')
 
     # Group by YearMonth and count accidents (Accident ID count or rows count)
     monthly_counts = accidents_df_copy.groupby('YearMonth').size().reset_index(name='AccidentsCount')
@@ -162,9 +240,8 @@ def get_accidents_features(accidents_df):
     # Drop rows with NaN values created by shifting
     monthly_counts = monthly_counts.dropna().reset_index(drop=True)
 
-    #
+    # Get the last known accidents count (historical data)
     last_known = monthly_counts[['AccidentsCount']].tail(3)['AccidentsCount'].values.tolist()
 
 
-    #
     return monthly_counts, last_known
