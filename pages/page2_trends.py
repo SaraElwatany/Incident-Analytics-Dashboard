@@ -5,10 +5,8 @@ import plotly.express as px
 from data import data_preprocess
 import pandas as pd
 
-
-
-# -------------------------------------------------- Trends & insights layout -------------------------------------------------- #
 accidents_df=data_preprocess('dataset\global_traffic_accidents.csv')
+
 header_trends=html.Div([
         html.H2("🚗 Accident Characteristics & Trends", className="mt-4"),
         html.P("Deep dive into temporal patterns, environmental factors, and accident severity analysis", 
@@ -16,12 +14,44 @@ header_trends=html.Div([
     ], className="text-center mb-4"),
 
 
+
+# ---------- Global Styles ----------
+styles = {
+    "card": {
+        "border": "1px solid #001f3f",
+        "borderRadius": "20px",
+        "margin-left": "80px",
+        "margin-bottom": "20px",
+        "padding": "1rem"
+    },
+    "card_title": {
+        "fontWeight": "bold"
+    },
+    "tab": {
+        'border': '2px solid #001f3f',
+        'border-radius': "25px",
+        'padding': '10px',
+        'fontWeight': 'bold',
+        'width': '200px',
+        'margin': '5px',
+    },
+    "datepicker": {
+        "borderRadius": "25px",
+        "margin": "10px",
+        "color": "#001f3f"
+    }
+}
+
+
+
+
+# === Figure Generators ===
+
 def create_accidents_over_date(selected_metric):
-    monthly_data = accidents_df.groupby(['Year', 'Month', 'Month_Num'])[selected_metric].sum().reset_index()
+    monthly_data = accidents_df.groupby(['Year','Month_Num'])[selected_metric].sum().reset_index()
     pivot_df = monthly_data.pivot(index='Month_Num', columns='Year', values=selected_metric).reset_index()
     pivot_df['Month'] = pivot_df['Month_Num'].apply(lambda x: pd.to_datetime(str(x), format='%m').strftime('%b'))
     pivot_df = pivot_df.sort_values('Month_Num')
-    pivot_df.columns.name = None
     fig = px.line(pivot_df,
                 x='Month',
                 y=[pivot_df.columns[1], pivot_df.columns[2]],   
@@ -75,11 +105,15 @@ def create_accidents_with_time():
     )
     return fig
 
+# === Layout ===
        
 trends_layout = html.Div([
     html.Div([
             dbc.Card([
-                html.H5("Accident Trends Over Time", className="card-title text-center mt-3",style={'fontWeight': 'bold'}),
+                html.H5("Accident Trends Over Time",
+                       className="card-title text-center mt-3",
+                       style=styles["card_title"]
+                    ),
                  dcc.DatePickerRange(   
                     id='date-range',
                     start_date=accidents_df['Date'].min(),
@@ -87,101 +121,99 @@ trends_layout = html.Div([
                     min_date_allowed=accidents_df['Date'].min(),
                     max_date_allowed=accidents_df['Date'].max(),
                     display_format='YYYY-MM-DD',
-                    style={
-                          
-                        "borderRadius": "2px",
-                        "margin":"10px",
-                        "color": "#001f3f"                   
-                    }
+                    style=styles["datepicker"]
                 ),
                 
                 dcc.Graph(id='time-series'),
-            ],className="mb-4 p-3",style={"border": "1px solid #001f3f","borderRadius": "20px","margin-left":"80px","margin-bottom":"20px","width":"1110px"}),
-          dbc.Card([
-            html.Div(id='env-title', className="card-title text-center mt-3"),
-            dcc.Dropdown(
-                id='env-dropdown',
-                options=[
-                    {'label': 'Weather Condition', 'value': 'Weather Condition'},
-                    {'label': 'Road Condition', 'value': 'Road Condition'},
-                     {'label': 'Cause of accidents', 'value': 'Cause'},
-                ],
-                value='Weather Condition',
-                 
-                style={
-                    "margin": "10px",
-
-                    }
+            ],
+             className="mb-4 p-3",
+             style=styles["card"]
             ),
-            dcc.Graph(id='env-boxplot')
-        ], className="mb-4 p-3",style={"border": "1px solid #001f3f","borderRadius": "20px","margin-left":"80px","margin-bottom":"20px",}),
-        dbc.Card([
-            html.H5("Casualties in 2023 vs Casualties in 2024 Monthly Trend", className="card-title text-center mt-3",style={'fontWeight': 'bold'}),
+          
+          dbc.Card([
+                html.Div(id='env-title',
+                        className="card-title text-center mt-3"
+                    ),
+                dcc.Dropdown(
+                    id='env-dropdown',
+                    options=[
+                        {'label': 'Weather Condition', 'value': 'Weather Condition'},
+                        {'label': 'Road Condition', 'value': 'Road Condition'},
+                        {'label': 'Cause of accidents', 'value': 'Cause'},
+                    ],
+                    value='Weather Condition',
+                    style={
+                        "margin": "10px",
+                    }
+                ),
+                dcc.Graph(id='env-boxplot')
+            ],
+             className="mb-4 p-3",
+             style=styles["card"]
+            ),
+        
+         dbc.Card([
+            html.H5("Casualties in 2023 vs Casualties in 2024 Monthly Trend",
+                    className="card-title text-center mt-3",
+                    style=styles["card_title"]
+                ),
                 dcc.Tabs(
                     id='metric-selector',
                     value='Casualties',
                     children=[
-                        dcc.Tab(label='Casualties', value='Casualties', 
-                                style={
-                                    'border': '2px solid #001f3f',
-                                    'border-radius': "25px",
-                                    'padding': '10px',
-                                    'fontWeight': 'bold',
-                                    'width':'200px',
-                                    'margin': '5px',
-                                },
-                                selected_style={
-                                     'border': '2px solid #001f3f',
-                                    'border-radius': "25px",
-                                    'padding': '10px',
-                                    'fontWeight': 'bold',
-                                     'width':'200px',
-                                     'margin': '5px',
-                                }),
-                        dcc.Tab(label='Vehicles Involved', value='Vehicles Involved', 
-                                style={
-                                    'border': '2px solid #001f3f',
-                                    'border-radius': "25px",
-                                    'padding': '10px',
-                                    'fontWeight': 'bold',
-                                    'width':'200px',
-                                    'margin': '5px',
-                                },
-                                selected_style={
-                                    'border': '2px solid #001f3f',
-                                    'border-radius': "25px",
-                                    'padding': '10px',
-                                    'fontWeight': 'bold',
-                                    'width':'200px',
-                                    'margin': '5px',
-                                })
+                        dcc.Tab(
+                            label='Casualties',
+                            value='Casualties', 
+                            style=styles["tab"],
+                            selected_style=styles["tab"]
+                        ),
+                        dcc.Tab(
+                            label='Vehicles Involved',
+                            value='Vehicles Involved', 
+                            style=styles["tab"],
+                            selected_style=styles["tab"]
+                        ),
                     ],
                 ),
 
                 dcc.Graph(id='monthly-trend-graph')
-            ], className="mb-4 p-3",style={"border": "1px solid #001f3f","borderRadius": "20px","margin-left":"80px","margin-bottom":"20px",}),
+            ],
+             className="mb-4 p-3",
+             style=styles["card"]
+            ),
         
         dbc.Row(children=[
             dbc.Col([
                 dbc.Card([
-                    html.H5("Accident Severity (Based on Casualties & Vehicles)", className="card-title text-center mt-3",style={'fontWeight': 'bold'}),
-                        dcc.Graph(figure=create_severity_figure())
-                    ], className="mb-4 p-3",style={"border": "1px solid #001f3f","borderRadius": "20px","margin-left":"80px","margin-bottom":"20px",}),
-               
+                    html.H5("Accident Severity (Based on Casualties & Vehicles)",
+                            className="card-title text-center mt-3",
+                            style=styles["card_title"]
+                        ),
+                        dcc.Graph(figure=create_severity_figure()
+                    ),
+                ],
+                 className="mb-4 p-3",
+                 style=styles["card"]
+                ),  
             ]),
+
             dbc.Col([
                dbc.Card([
-            html.H5("Accidents by Time of Day", className="card-title text-center mt-3",style={'fontWeight': 'bold'}),
-                dcc.Graph(figure=create_accidents_with_time())
-            ], className="mb-4 p-3",style={"border": "1px solid #001f3f","borderRadius": "20px","margin-left":"80px","margin-bottom":"20px",}),
-        
-        ]),
-      
-        ]),
-        
-        
+                    html.H5("Accidents by Time of Day",
+                            className="card-title text-center mt-3",
+                            style=styles["card_title"]
+                    ),
+                   dcc.Graph(figure=create_accidents_with_time())
+                ], 
+                 className="mb-4 p-3",
+                 style=styles["card"]
+                ),
+            ]),
+        ]),  
     ])
 ])
+
+# === Callbacks ===
 
 @callback(
     Output('time-series', 'figure'),
@@ -192,11 +224,14 @@ def update_time_series(start_date, end_date):
     mask = (accidents_df['Date'] >= start_date) & (accidents_df['Date'] <= end_date)
     filtered_data = accidents_df.loc[mask]
     grouped = filtered_data.groupby('Date').size().reset_index(name='accident_count')
-    fig = px.line(grouped, x='Date', y='accident_count',
-                  labels={'accident_count': 'Number of Accidents'},
-                  template='plotly_white',
-                  color_discrete_sequence=['#001f3f']
-                  )
+    fig = px.line(
+              grouped, 
+              x='Date',
+              y='accident_count',
+              labels={'accident_count': 'Number of Accidents'},
+              template='plotly_white',
+              color_discrete_sequence=['#001f3f']
+            )
     fig.update_traces(mode='lines+markers')
     return fig
 
@@ -220,7 +255,6 @@ def update_env_plot(selected_feature):
         f"<br>Total Casualties: {row['Total Casualties']}"
         f"<br>Total Vehicles: {row['Total Vehicles']}"
     ), axis=1)
-    print(grouped_df)
     fig = px.bar(
         grouped_df,
         x=selected_feature,
@@ -232,10 +266,8 @@ def update_env_plot(selected_feature):
     )
 
     fig.update_traces(
-        
         hovertemplate='%{customdata[0]}<extra></extra>'
     )
-
     return fig
 
 @callback(
@@ -258,9 +290,4 @@ def update_env_title(selected_feature):
 def update_trend_graph(selected_metric):
     fig=create_accidents_over_date(selected_metric)
     return fig
-
-
-
-
-
 

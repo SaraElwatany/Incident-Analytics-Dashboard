@@ -25,8 +25,7 @@ def data_preprocess(path):
     accidents_df['City'] = accidents_df['Location'].map(lambda x:x.split(',')[0])
     accidents_df['Country'] = accidents_df['Location'].map(lambda x:x.split(',')[1])
     accidents_df['Date'] = pd.to_datetime(accidents_df['Date'])
-    accidents_df['Year'] = accidents_df['Date'].dt.year
-    accidents_df['Month'] = accidents_df['Date'].dt.strftime('%b')  
+    accidents_df['Year'] = accidents_df['Date'].dt.year 
     accidents_df['Month_Num'] = accidents_df['Date'].dt.month       
     accidents_df['Hour'] = pd.to_datetime(accidents_df['Time'], format='%H:%M').dt.hour
     accidents_df['Time Segment'] = accidents_df['Hour'].apply(get_time_segment)
