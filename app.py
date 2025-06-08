@@ -14,6 +14,7 @@ from dash import Dash, html, dcc, Input, Output, State, callback
 # User-Defined Modules
 from tools import monthly_casualties, forecast_interval, get_casualties_features, get_accidents_features
 from pages.page2_trends import trends_layout,header_trends  
+from pages.page1_home import create_insights_layout 
 from data import data_preprocess
 
 
@@ -32,7 +33,6 @@ accidents_forecast_model = load('models/accidents_forecasting_model.pkl')
 # Initialize the dash application
 app = Dash(__name__, external_stylesheets=[dbc.themes.COSMO], suppress_callback_exceptions=True)
 server = app.server
-
 
 
 # ----------------- Application Layouts ----------------- #
@@ -165,10 +165,7 @@ app.layout = dmc.MantineProvider(
 
 # -------------------------------------------------- Pages Layouts -------------------------------------------------- #
 
-home_layout = html.Div([
-    html.H2("Welcome to the Home Page"),
-    html.P("This is the overview of the Incidentlytics Dashboard.")
-])
+home_layout = create_insights_layout()
 
 
 #------------------------------------------------------------------------------------------
@@ -176,16 +173,6 @@ experiences_layout = html.Div([
     html.H2("Experiences Page"),
     html.P("This page contains user experiences or analysis.")
 ])
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -526,7 +513,7 @@ def generate_forecast(n_clicks, months, model_type):
 )
 def display_page(pathname):
     if pathname == "/":
-        return home_layout, "Home"
+        return home_layout,  "Home"
     elif pathname == "/trends":
         return trends_layout,header_trends 
     elif pathname == "/experinces":
