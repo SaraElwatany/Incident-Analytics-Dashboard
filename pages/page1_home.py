@@ -75,7 +75,7 @@ def create_insights_layout():
                     dbc.Card([
                         html.H5("Weather × Road Conditions During Accidents", className="card-title text-center mt-3",
                                 style={'fontWeight': 'bold'}),
-                        dcc.Graph(id='sunburst-chart')
+                        dcc.Graph(id='pie-chart')
                     ], className="mb-4 p-3", style={"border": "1px solid #001f3f", "borderRadius": "20px"})
                 ], width=6)
             ])
@@ -187,7 +187,7 @@ def update_bar_chart(start_date, end_date, selected_countries, selected_weather)
     return fig
 
 @callback(
-    Output('sunburst-chart', 'figure'),
+    Output('pie-chart', 'figure'),
     Input('date-picker', 'start_date'),
     Input('date-picker', 'end_date'),
     Input('country-dropdown', 'value'),
