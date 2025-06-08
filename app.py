@@ -71,7 +71,7 @@ content_style = {
 pages_dict = {
                 "Home" : "/",
                 "Trends": "/trends",
-                "Experiences": "/experinces",
+                
                 "Forecast Accidents": "/TimeSeries"
              }
 
@@ -166,16 +166,6 @@ app.layout = dmc.MantineProvider(
 # -------------------------------------------------- Pages Layouts -------------------------------------------------- #
 
 home_layout = create_insights_layout()
-
-
-#------------------------------------------------------------------------------------------
-experiences_layout = html.Div([
-    html.H2("Experiences Page"),
-    html.P("This page contains user experiences or analysis.")
-])
-
-
-
 
 # -------------------------------------------------- Forecasting Page Layout -------------------------------------------------- #
 
@@ -516,8 +506,6 @@ def display_page(pathname):
         return home_layout,  "Home"
     elif pathname == "/trends":
         return trends_layout,header_trends 
-    elif pathname == "/experinces":
-        return experiences_layout, "Experiences"
     elif pathname == "/TimeSeries":
         return forecast_layout, "Forecast Accidents"
     else:
