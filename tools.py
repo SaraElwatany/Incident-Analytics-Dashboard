@@ -41,12 +41,12 @@ def monthly_casualties(accidents_df):
                     monthly_counts,
                     x='YearMonth',
                     y='Casualties',
-                    title='Monthly Casualties',
+                    title='',
                     markers=True,
                     labels={'YearMonth': 'Month', 'Casualties': 'Number of Casualties'}
                 )
     
-    fig.update_traces(line=dict(dash='solid'))
+    fig.update_traces(line=dict(color="#001f3f", dash='solid'), marker=dict(color="#001f3f"))
     fig.update_layout(template='plotly_white')
 
     return fig

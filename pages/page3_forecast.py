@@ -279,10 +279,14 @@ def update_city_dropdown(selected_country):
                         'USA': ['New York']
                       }
     
-    if selected_country.strip() in city_country_map:
+    if not selected_country:
+        return []
+    
+    elif selected_country.strip() in city_country_map:
         return city_country_map[selected_country.strip()]
-
+    
     return []
+
 
 
 
@@ -403,8 +407,8 @@ def generate_forecast(n_clicks, months, model_type):
 
     # Plotting forecast
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=x_col, y=y_col, mode='lines+markers', name='Historical'))
+    fig.add_trace(go.Scatter(x=x_col, y=y_col, mode='lines+markers', line=dict(color='#001f3f'), marker=dict(color='#001f3f'),  name='Historical'))
     fig.add_trace(go.Scatter(x=future_dates, y=future_predictions, mode='lines+markers', name='Forecast'))
-    fig.update_layout(title='Monthly Forecast', xaxis_title='Date', yaxis_title=title)
+    fig.update_layout(title='', xaxis_title='Date', yaxis_title=title, template='plotly_white')
 
     return fig
