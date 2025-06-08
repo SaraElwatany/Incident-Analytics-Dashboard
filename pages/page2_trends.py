@@ -107,9 +107,10 @@ trends_layout = html.Div([
                      {'label': 'Cause of accidents', 'value': 'Cause'},
                 ],
                 value='Weather Condition',
-                #clearable=False,
+                 
                 style={
                     "margin": "10px",
+
                     }
             ),
             dcc.Graph(id='env-boxplot')
@@ -204,19 +205,37 @@ def update_time_series(start_date, end_date):
     Input('env-dropdown', 'value')
 )
 def update_env_plot(selected_feature):
-    grouped_df = accidents_df[selected_feature].value_counts().reset_index()
-    grouped_df.columns = [selected_feature, 'Number of Accidents']
-
+    grouped_df = accidents_df.groupby(selected_feature).agg({
+        'Casualties': 'sum',
+        selected_feature: 'count',
+        'Vehicles Involved': 'sum',
+    }).rename(columns={
+        selected_feature: 'Number of Accidents',
+        'Casualties': 'Total Casualties',
+        'Vehicles Involved': 'Total Vehicles',
+    }).reset_index()
+    grouped_df['Hover'] = grouped_df.apply(lambda row: (
+        f"{selected_feature}: {row[selected_feature]}"
+        f"<br>Number of Accidents: {row['Number of Accidents']}"
+        f"<br>Total Casualties: {row['Total Casualties']}"
+        f"<br>Total Vehicles: {row['Total Vehicles']}"
+    ), axis=1)
+    print(grouped_df)
     fig = px.bar(
-    grouped_df,
-    x=selected_feature,
-    y='Number of Accidents',
-    template='plotly_white',
-    color=selected_feature,   
-    color_discrete_sequence=['#1e2d3b', '#36454f', '#3e78b2', '#003366', '#001f3f','#3a6d8c'],
-    labels={'Number of Accidents': 'Number of Accidents'}
-     )
-    fig.update_layout(showlegend=False)
+        grouped_df,
+        x=selected_feature,
+        y='Number of Accidents',
+        template='plotly_white',
+        color=selected_feature,
+        color_discrete_sequence=['#1e2d3b', '#36454f', '#3e78b2', '#003366', '#001f3f','#3a6d8c'],
+        hover_data=['Hover']
+    )
+
+    fig.update_traces(
+        
+        hovertemplate='%{customdata[0]}<extra></extra>'
+    )
+
     return fig
 
 @callback(
@@ -239,3 +258,9 @@ def update_env_title(selected_feature):
 def update_trend_graph(selected_metric):
     fig=create_accidents_over_date(selected_metric)
     return fig
+
+
+
+
+
+
