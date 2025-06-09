@@ -264,28 +264,25 @@ def update_forecast_layout(selected_model):
 )
 def update_city_dropdown(selected_country):
 
-    print(selected_country)
-
     city_country_map = {
-                        'Australia': ['Sydney'],
-                        'Brazil': ['São Paulo'],
-                        'Canada': ['Toronto'],
-                        'China': ['Beijinj'],
-                        'France': ['Paris'],
-                        'Germany': ['Berlin'],
-                        'India': ['Mumbai'],
-                        'Japan': ['Tokyo'],
-                        'UK': ['London'],
-                        'USA': ['New York']
-                      }
-    
+        'Australia': ['Sydney'],
+        'Brazil': ['São Paulo'],
+        'Canada': ['Toronto'],
+        'China': ['Beijinj'],
+        'France': ['Paris'],
+        'Germany': ['Berlin'],
+        'India': ['Mumbai'],
+        'Japan': ['Tokyo'],
+        'UK': ['London'],
+        'USA': ['New York']
+    }
+
     if not selected_country:
         return []
     
-    elif selected_country.strip() in city_country_map:
-        return city_country_map[selected_country.strip()]
-    
-    return []
+    cities = city_country_map.get(selected_country.strip(), [])
+    return [{'label': city, 'value': city} for city in cities]
+
 
 
 
