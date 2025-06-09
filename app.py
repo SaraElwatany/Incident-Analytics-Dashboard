@@ -41,13 +41,17 @@ sidebar_style = {
     "z-index": "999"
 }
 
-# Page Content Style
+# Page Content Style with Analytics Globe Background
 content_style = {
     "margin-left": "22rem",  # Space for sidebar
     "margin-top": "80px",    # Space for navbar
     "padding": "30px",
     "min-height": "calc(100vh - 80px)",
     "background-color": "#f3f3f3",
+    "background-repeat": "no-repeat",
+    "background-position": "center center",
+    "background-size": "800px 800px",
+    "background-attachment": "fixed"
 }
 
 # Pages Navigator
@@ -81,7 +85,7 @@ navbar = html.Div([
                                'font-family': 'Segoe UI, sans-serif'
                            })
                 ], style={'display': 'flex', 'align-items': 'center'})
-            ], width=4),
+            ], width=3),
             dbc.Col([
                 html.Div([
                     dbc.Nav([
@@ -94,7 +98,7 @@ navbar = html.Div([
                                 "color": "#FFD700",
                                 "font-weight": "600",
                                 "font-size": "16px",
-                                "margin": "0 15px",
+                                "margin": "0 20px",
                                 "padding": "8px 16px",
                                 "border-radius": "20px",
                                 "transition": "all 0.3s ease",
@@ -106,7 +110,10 @@ navbar = html.Div([
                     style={"height": "100%"}
                     )
                 ])
-            ], width=8, className="d-flex justify-content-center align-items-center")
+            ], width=6, className="d-flex justify-content-center align-items-center"),
+            dbc.Col([
+                # Empty column for balance
+            ], width=3)
         ], className="h-100")
     ], fluid=True, className="h-100")
 ], style=navbar_style)
@@ -236,6 +243,15 @@ app.layout = dmc.MantineProvider([
         .DateInput_input:focus {
             border-color: #FFD700 !important;
         }
+        
+        /* Background overlay for better content readability */
+        .content-overlay {
+            background: rgba(243, 243, 243, 0.85);
+            backdrop-filter: blur(1px);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+        }
         </style>
     """, dangerously_allow_html=True)
 ])
@@ -263,11 +279,16 @@ def display_page(pathname):
             html.Div(trends_layout, style=content_style)
         ])
     elif pathname == "/TimeSeries":
-        # Forecast page: empty sidebar for alignment
-        return html.Div([
-            empty_sidebar,
-            html.Div(forecast_layout, style=content_style)
-        ])
+        # Forecast page: no sidebar, with analytics globe background
+        forecast_content_style = {
+            **content_style, 
+            "margin-left": "0",  # Remove sidebar spacing
+            "padding": "70px"  # Match the forecast layout padding
+        }
+        return html.Div(
+            forecast_layout,
+            style=forecast_content_style
+        )
     else:
         return html.Div([
             empty_sidebar,

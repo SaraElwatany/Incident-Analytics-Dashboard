@@ -114,7 +114,7 @@ def create_accidents_with_time():
 
 # ---------- Layout ----------
 trends_layout = html.Div([
-    header_trends,
+    #header_trends,
     html.Div([
         dbc.Card([
             html.H5("Accident Trends Over Time", className="card-title text-center mt-3", style=styles["card_title"]),
