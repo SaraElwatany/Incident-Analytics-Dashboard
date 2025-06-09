@@ -110,9 +110,9 @@ sidebar = html.Div(
                             style={
                                     "margin-bottom": "15px",
                                     "background-color": "#001f3f",  # Match sidebar bg
-                                    "color": "#FFD700",  # Yellow text
+                                    "color": "#f3f3f3" , # Yellow text
                                     "font-weight": "600",
-                                    "border": "1px solid #FFD700",
+                                    "border": "1px solid #f3f3f3",
                                     "border-radius": "5px",
                                     "padding": "10px",
                                 })
