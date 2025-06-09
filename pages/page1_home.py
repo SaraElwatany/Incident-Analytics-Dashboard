@@ -75,7 +75,7 @@ def create_insights_layout():
                     dbc.Card([
                         html.H5("Weather × Road Conditions During Accidents", className="card-title text-center mt-3",
                                 style={'fontWeight': 'bold'} ),
-                        dcc.Graph(id='pie-chart')
+                        dcc.Graph(id='heat-chart')
                     ], className="mb-4 p-3", style={"border": "1px solid #001f3f", "borderRadius": "20px"})
                 ], width=6)
             ])
@@ -187,13 +187,13 @@ def update_bar_chart(start_date, end_date, selected_countries, selected_weather)
     return fig
 
 @callback(
-    Output('pie-chart', 'figure'),
+    Output('heat-chart', 'figure'),
     Input('date-picker', 'start_date'),
     Input('date-picker', 'end_date'),
     Input('country-dropdown', 'value'),
     Input('weather-dropdown', 'value'),
 )
-def update_pie_chart(start_date, end_date, selected_countries, selected_weather):
+def update_heat_chart(start_date, end_date, selected_countries, selected_weather):
     filtered_df = filter_data(start_date, end_date, selected_countries, selected_weather)
     combo_counts = (
         filtered_df.groupby(['Weather Condition', 'Road Condition'])
