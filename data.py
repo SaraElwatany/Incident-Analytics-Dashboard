@@ -23,8 +23,8 @@ def get_time_segment(hour):
 
 def data_preprocess(path):
     accidents_df = pd.read_csv('dataset/global_traffic_accidents.csv')
-    accidents_df['City'] = accidents_df['Location'].map(lambda x:x.split(',')[0])
-    accidents_df['Country'] = accidents_df['Location'].map(lambda x:x.split(',')[1])
+    accidents_df['City'] = accidents_df['Location'].map(lambda x:x.split(',')[0].strip())
+    accidents_df['Country'] = accidents_df['Location'].map(lambda x:x.split(',')[1].strip())
     accidents_df['Date'] = pd.to_datetime(accidents_df['Date'])
     accidents_df['Year'] = accidents_df['Date'].dt.year 
     accidents_df['Month_Num'] = accidents_df['Date'].dt.month       

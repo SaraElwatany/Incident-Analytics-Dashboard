@@ -4,7 +4,7 @@ import plotly.express as px
 
 
 
-def monthly_casualties(accidents_df):
+def monthly_casualties(accidents_df, country):
 
     """
     Plot the total number of casualties per month.
@@ -30,8 +30,15 @@ def monthly_casualties(accidents_df):
     """
 
 
-    # Group by YearMonth and sum casualties
-    monthly_counts = accidents_df.groupby('YearMonth')['Casualties'].sum().reset_index()
+    if country != '':
+        monthly_counts = accidents_df[accidents_df['Country'] == country].copy()
+
+    else:
+        monthly_counts = accidents_df.copy()
+
+
+    # Group by YearMonth and get average casualties
+    monthly_counts = monthly_counts.groupby('YearMonth')['Casualties'].mean().reset_index()
 
     # Convert YearMonth to timestamp
     monthly_counts['YearMonth'] = monthly_counts['YearMonth'].dt.to_timestamp()

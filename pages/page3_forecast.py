@@ -83,6 +83,12 @@ def create_forecast_layout():
             )
 
         ])
+        
+        # ,dbc.Row([
+
+
+        # ])
+
 
     ], style={"padding": "70px"})
 
@@ -120,18 +126,8 @@ def update_forecast_layout(selected_model):
                                                 marks={i: f"{i}" for i in range(1, 13)},
                                             ),
 
-                                    html.Br(),
+                                    html.Br()
 
-                                    html.Button("Forecast", id="forecast-btn", n_clicks=0, style={
-                                                                                                    "backgroundColor": "#28a745",
-                                                                                                    "color": "white",
-                                                                                                    "border": "none",
-                                                                                                    "padding": "10px 24px",
-                                                                                                    "fontSize": "16px",
-                                                                                                    "borderRadius": "6px",
-                                                                                                    "cursor": "pointer",
-                                                                                                    "width": "100%"
-                                                                                                }),
                                 ], style={"padding": "20px"})
 
         return fig, right_content, title
@@ -141,10 +137,9 @@ def update_forecast_layout(selected_model):
     elif selected_model == "assess_accident":
 
         # Set a title to the card
-        title = "Global Monthly Casualties" 
+        title = "Global Monthly Average Casualties" 
 
-        fig = monthly_casualties(accidents_df)
-
+        fig = monthly_casualties(accidents_df, '')
 
         # Modify the right content
         right_content = html.Div([
@@ -225,9 +220,8 @@ def update_forecast_layout(selected_model):
                                             ], style={"width": "48%", "display": "inline-block"})
 
                                     ]),
-                                    html.Br(), html.Br(),
 
-                                    html.Div(id="prediction-output", style={"marginTop": "20px", "fontSize": "20px", "color": "darkgreen", "fontWeight": "bold"}),
+                                    html.Br(),
 
                                     html.Div([
                                         html.Button("Assess", id="submit-assess-btn", n_clicks=0, style={
@@ -242,7 +236,25 @@ def update_forecast_layout(selected_model):
                                             "borderRadius": "6px",
                                             "cursor": "pointer",
                                             "width": "100%"
-                                        })
+                                        }),
+                                    
+                                    html.Br(),
+
+                                    html.Div(
+                                                id="prediction-output",
+                                                style={
+                                                    "marginTop": "10px",
+                                                    "padding": "15px",
+                                                    "border": "1px solid #ccc",
+                                                    "borderRadius": "8px",
+                                                    "backgroundColor": "#f9f9f9",
+                                                    "fontSize": "18px",
+                                                    "fontWeight": "bold",
+                                                    "color": "#155724",
+                                                    "boxShadow": "0 2px 5px rgba(0, 0, 0, 0.1)"
+                                                }
+                                            )
+                                    
                                     ])
                                 ], style={"padding": "20px", "fontFamily": "Arial, sans-serif"})
 
@@ -259,12 +271,19 @@ def update_forecast_layout(selected_model):
 
 
 @callback(
+    Output("main-forecast-graph", "figure", allow_duplicate=True),
+    Output("forecast-card-title", "children", allow_duplicate=True),
     Output('city-dropdown', 'options'),
-    Input('country-dropdown', 'value')
+    Input('country-dropdown', 'value'),
+    prevent_initial_call=True
 )
 def update_city_dropdown(selected_country):
 
-    print(selected_country)
+    
+    cities_menu = []
+    title = "Global Monthly Average Casualties" 
+    fig = monthly_casualties(accidents_df, '')
+
 
     city_country_map = {
                         'Australia': ['Sydney'],
@@ -278,14 +297,17 @@ def update_city_dropdown(selected_country):
                         'UK': ['London'],
                         'USA': ['New York']
                       }
+
     
     if not selected_country:
-        return []
+        return fig, title, cities_menu
     
     elif selected_country.strip() in city_country_map:
-        return city_country_map[selected_country.strip()]
+        title = f"{selected_country.strip()} Monthly Average Casualties" 
+        fig = monthly_casualties(accidents_df, selected_country.strip())
+        cities_menu = city_country_map[selected_country.strip()]
     
-    return []
+    return fig, title, cities_menu
 
 
 
@@ -379,12 +401,11 @@ def predict_casualties(n_clicks, city, country, lat, lon, vehicles, weather, roa
 
 @callback(
     Output("main-forecast-graph", "figure", allow_duplicate=True),
-    Input("forecast-btn", "n_clicks"),
-    State("month-slider", "value"),
+    Input("month-slider", "value"),
     State("model-dropdown", "value"),
     prevent_initial_call=True
 )
-def generate_forecast(n_clicks, months, model_type):
+def generate_forecast(months, model_type):
 
     if model_type == "forecast_accidents":
 
@@ -409,6 +430,17 @@ def generate_forecast(n_clicks, months, model_type):
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=x_col, y=y_col, mode='lines+markers', line=dict(color='#001f3f'), marker=dict(color='#001f3f'),  name='Historical'))
     fig.add_trace(go.Scatter(x=future_dates, y=future_predictions, mode='lines+markers', name='Forecast'))
+
+    # Add dashed connector between last historical and first forecasted point
+    if len(x_col) > 0 and len(future_dates) > 0:
+        fig.add_trace(go.Scatter(
+                                    x=[x_col.iloc[-1], future_dates[0]],
+                                    y=[y_col.iloc[-1], future_predictions[0]],
+                                    mode='lines',
+                                    line=dict(color='#001f3f', dash='dash'),
+                                    showlegend=False
+                                ))
+
     fig.update_layout(title='', xaxis_title='Date', yaxis_title=title, template='plotly_white')
 
     return fig
