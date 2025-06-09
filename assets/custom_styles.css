@@ -1,0 +1,161 @@
+/* Custom styles for the Incidentlytics Dashboard */
+
+/* Global styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f3f3f3;
+}
+
+/* Navigation hover effects */
+.nav-link-custom:hover {
+    background-color: #FFD700 !important;
+    color: #001f3f !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.nav-link-custom.active {
+    background-color: #FFD700 !important;
+    color: #001f3f !important;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+}
+
+/* Sidebar styling */
+.sidebar-filter-section {
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0, 31, 63, 0.1);
+    border-left: 4px solid #001f3f;
+}
+
+/* Custom dropdown styles */
+.Select-control {
+    border: 2px solid #e9ecef !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+.Select-control:hover {
+    border-color: #FFD700 !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25) !important;
+}
+
+.Select-control.is-focused {
+    border-color: #001f3f !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 31, 63, 0.25) !important;
+}
+
+/* Date picker custom styles */
+.DateInput {
+    border-radius: 8px !important;
+}
+
+.DateInput_input {
+    border: 2px solid #e9ecef !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    padding: 8px 12px !important;
+}
+
+.DateInput_input:focus {
+    border-color: #001f3f !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 31, 63, 0.25) !important;
+}
+
+.DateInput_input:hover {
+    border-color: #FFD700 !important;
+}
+
+/* Button styling */
+.btn-outline-primary {
+    border: 2px solid #001f3f !important;
+    color: #001f3f !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: #001f3f !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 31, 63, 0.2);
+}
+
+/* Card enhancements */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 31, 63, 0.15) !important;
+}
+
+/* Scrollbar styling for sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #001f3f;
+    border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #FFD700;
+}
+
+/* Loading spinner customization */
+._dash-loading {
+    color: #001f3f !important;
+}
+
+/* Graph container styling */
+.js-plotly-plot {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Animation for cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        position: relative !important;
+        top: 0 !important;
+    }
+    
+    .content {
+        margin-left: 0 !important;
+        margin-top: 0 !important;
+    }
+    
+    .navbar {
+        position: relative !important;
+        height: auto !important;
+    }
+}

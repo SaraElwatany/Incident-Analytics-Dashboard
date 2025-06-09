@@ -21,67 +21,84 @@ color_seq = [
 
 def create_insights_layout():
     layout = html.Div([
-        dbc.Card([
-            dbc.Row([
-                dbc.Col([
-                    html.Label("Select Date Range"),
-                    dcc.DatePickerRange(
-                        id='date-picker',
-                        start_date=df['Date'].min(),
-                        end_date=df['Date'].max(),
-                        min_date_allowed=df['Date'].min(),
-                        max_date_allowed=df['Date'].max(),
-                        display_format='YYYY-MM-DD',
-                        style={"margin": "10px", "width": "100%"}
-                    )
-                ], width=4),
-                dbc.Col([
-                    html.Label("Select Country"),
-                    dcc.Dropdown(
-                        id='country-dropdown',
-                        options=[{'label': c, 'value': c} for c in sorted(df['Country'].unique())],
-                        multi=True,
-                        style={"width": "100%"}
-                    )
-                ], width=4),
-                dbc.Col([
-                    html.Label("Select Weather Condition"),
-                    dcc.Dropdown(
-                        id='weather-dropdown',
-                        options=[{'label': w, 'value': w} for w in sorted(df['Weather Condition'].unique())],
-                        multi=True,
-                        style={"width": "100%"}
-                    )
-                ], width=4),
-            ], className="mb-4", style={"padding": "10px"}),
+        # Main content area without filters (filters are now in sidebar)
+        html.Div([
             dbc.Row([
                 dbc.Col([
                     dbc.Card([
-                        html.H5("Accident Density by Country", className="card-title text-center mt-3",
-                                style={'fontWeight': 'bold'}),
-                        dcc.Graph(id='choropleth-map')
-                    ], className="mb-4 p-3", style={"border": "1px solid #001f3f", "borderRadius": "20px"})
+                        dbc.CardHeader([
+                            html.H5("Accident Density by Country", 
+                                    className="card-title text-center",
+                                    style={
+                                        'fontWeight': 'bold',
+                                        'color': '#001f3f',
+                                        'margin': '0'
+                                    })
+                        ], style={'background-color': '#f8f9fa', 'border-bottom': '2px solid #001f3f'}),
+                        dbc.CardBody([
+                            dcc.Graph(id='choropleth-map', style={'height': '500px'})
+                        ])
+                    ], 
+                    className="mb-4", 
+                    style={
+                        "border": "2px solid #001f3f", 
+                        "borderRadius": "15px",
+                        "box-shadow": "0 4px 15px rgba(0,31,63,0.1)"
+                    })
                 ], width=12)
             ]),
+
             dbc.Row([
                 dbc.Col([
                     dbc.Card([
-                        html.H5("Top Cities with Most Accidents", className="card-title text-center mt-3",
-                                style={'fontWeight': 'bold'}),
-                        dcc.Graph(id='bar-chart')
-                    ], className="mb-4 p-3", style={"border": "1px solid #001f3f", "borderRadius": "20px"})
+                        dbc.CardHeader([
+                            html.H5("Top Cities with Most Accidents", 
+                                    className="card-title text-center",
+                                    style={
+                                        'fontWeight': 'bold',
+                                        'color': '#001f3f',
+                                        'margin': '0'
+                                    })
+                        ], style={'background-color': '#f8f9fa', 'border-bottom': '2px solid #001f3f'}),
+                        dbc.CardBody([
+                            dcc.Graph(id='bar-chart', style={'height': '400px'})
+                        ])
+                    ], 
+                    className="mb-4", 
+                    style={
+                        "border": "2px solid #001f3f", 
+                        "borderRadius": "15px",
+                        "box-shadow": "0 4px 15px rgba(0,31,63,0.1)"
+                    })
                 ], width=6),
+
                 dbc.Col([
                     dbc.Card([
-                        html.H5("Weather × Road Conditions During Accidents", className="card-title text-center mt-3",
-                                style={'fontWeight': 'bold'} ),
-                        dcc.Graph(id='heat-chart')
-                    ], className="mb-4 p-3", style={"border": "1px solid #001f3f", "borderRadius": "20px"})
+                        dbc.CardHeader([
+                            html.H5("Weather × Road Conditions During Accidents", 
+                                    className="card-title text-center",
+                                    style={
+                                        'fontWeight': 'bold',
+                                        'color': '#001f3f',
+                                        'margin': '0'
+                                    })
+                        ], style={'background-color': '#f8f9fa', 'border-bottom': '2px solid #001f3f'}),
+                        dbc.CardBody([
+                            dcc.Graph(id='heat-chart', style={'height': '400px'})
+                        ])
+                    ], 
+                    className="mb-4", 
+                    style={
+                        "border": "2px solid #001f3f", 
+                        "borderRadius": "15px",
+                        "box-shadow": "0 4px 15px rgba(0,31,63,0.1)"
+                    })
                 ], width=6)
             ])
-        ], className="mb-4 p-3", style={"border": "1px solid #001f3f", "borderRadius": "20px", "margin-left": "80px", "width": "1110px"})
-    ])
+        ])  
+    ])  
     return layout
+
 
 def filter_data(start_date, end_date, selected_countries, selected_weather):
     filtered = df[(df['Date'] >= start_date) & (df['Date'] <= end_date)]
