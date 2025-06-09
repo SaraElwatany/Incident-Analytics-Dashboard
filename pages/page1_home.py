@@ -74,7 +74,7 @@ def create_insights_layout():
                 dbc.Col([
                     dbc.Card([
                         html.H5("Weather × Road Conditions During Accidents", className="card-title text-center mt-3",
-                                style={'fontWeight': 'bold'}),
+                                style={'fontWeight': 'bold'} ),
                         dcc.Graph(id='pie-chart')
                     ], className="mb-4 p-3", style={"border": "1px solid #001f3f", "borderRadius": "20px"})
                 ], width=6)
@@ -202,38 +202,15 @@ def update_pie_chart(start_date, end_date, selected_countries, selected_weather)
         .sort_values('Count', ascending=False)
         .head(5)
     )
-    combo_counts['Label'] = combo_counts['Weather Condition'] + " / " + combo_counts['Road Condition']
-    fig = px.pie(
-        combo_counts,
-        names='Label',
-        values='Count',
-        color_discrete_sequence=color_seq
+    # Pivot for heatmap
+    heatmap_data = combo_counts.pivot(index='Road Condition', columns='Weather Condition', values='Count').fillna(0)
+    fig = px.imshow(
+        heatmap_data,
+        color_continuous_scale=color_seq,
+        labels=dict(x="Weather Condition", y="Road Condition", color="Accident Count"),
+        text_auto=True
     )
-    fig.update_traces(textinfo='percent+label', pull=[0.05]*len(combo_counts))
-    default_start = df['Date'].min().strftime("%Y-%m-%d")
-    default_end = df['Date'].max().strftime("%Y-%m-%d")
-    if start_date is None:
-        start_date = default_start
-    if end_date is None:
-        end_date = default_end
-    start_date_short = start_date[:10]
-    end_date_short = end_date[:10]
-    date_filtered = (start_date_short != default_start) or (end_date_short != default_end)
-    filters_applied = (
-        selected_weather or
-        selected_countries or
-        date_filtered
-    )
-    show_legend = not filters_applied
     fig.update_layout(
-        showlegend=show_legend,
-        legend=dict(
-            orientation='v',
-            yanchor='middle',
-            y=0.5,
-            xanchor='left',
-            x=1.05
-        ),
         margin=dict(l=20, r=20, t=60, b=20)
     )
     return fig
