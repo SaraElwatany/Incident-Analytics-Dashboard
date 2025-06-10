@@ -9,7 +9,7 @@
   * [🗺️ Home Page – Exploratory Data Analysis](#️-home-page--exploratory-data-analysis)
   * [📈 Insights Page – Analytical Trends](#-insights-page--analytical-trends)
   * [🤖 Forecasting Page – Predictive Modeling](#-forecasting-page--predictive-modeling)
-* [📁 Project Structure](#-project-structure)
+* [📁Project Structure](#-project-structure)
 * [💡 Key Technologies](#-key-technologies)
 * [🚀 How to Run the App](#-how-to-run-the-app)
 * [🤝 Let's Collaborate](#-lets-collaborate)
