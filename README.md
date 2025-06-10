@@ -3,6 +3,20 @@
 
 ## Table of Contents
 
+* [📌 Intro](#intro)
+* [🔍 Project Overview](#-project-overview)
+
+  * [🗺️ Home Page – Exploratory Data Analysis](#️-home-page--exploratory-data-analysis)
+  * [📈 Insights Page – Analytical Trends](#-insights-page--analytical-trends)
+  * [🤖 Forecasting Page – Predictive Modeling](#-forecasting-page--predictive-modeling)
+* [📁 Project Structure](#-project-structure)
+* [💡 Key Technologies](#-key-technologies)
+* [🚀 How to Run the App](#-how-to-run-the-app)
+* [🤝 Let's Collaborate](#-lets-collaborate)
+* [👥 Collaborators](#-collaborators)
+
+
+
 
 ## Intro
 
@@ -132,9 +146,17 @@ This project was a great experience combining data science, visualization, and M
 
 
 
+
+
 ## 👥 Collaborators
 
-* **Amany Alsayed** – [LinkedIn](https://www.linkedin.com/in/amany-alsayed82) | [GitHub](https://github.com/Amany-alsayed)  | [Email](amanyalsayed82@gmail.com)
-* **Sara Elwatany** – [LinkedIn](https://www.linkedin.com/in/sara-elwatany) | [GitHub](https://github.com/SaraElwatany)  | [Email](saraayman10000@gmail.com)
-* **Zad Walid** – [LinkedIn](https://www.linkedin.com/in/zadwalid) | [GitHub](https://github.com/Zad-Walid)  | [Email](zadwalid06@gmail.com)
+* **Amany Alsayed**
+  🔗 [LinkedIn](https://www.linkedin.com/in/amany-alsayed82) | 💻 [GitHub](https://github.com/Amany-alsayed) | ✉️ [Email](mailto:amanyalsayed82@gmail.com)
+
+* **Sara Elwatany**
+  🔗 [LinkedIn](https://www.linkedin.com/in/sara-elwatany) | 💻 [GitHub](https://github.com/SaraElwatany) | ✉️ [Email](mailto:saraayman10000@gmail.com)
+
+* **Zad Walid**
+  🔗 [LinkedIn](https://www.linkedin.com/in/zadwalid) | 💻 [GitHub](https://github.com/Zad-Walid) | ✉️ [Email](mailto:zadwalid06@gmail.com)
+
 
