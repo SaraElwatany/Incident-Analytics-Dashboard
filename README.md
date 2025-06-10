@@ -1,15 +1,21 @@
-# Incident Analytics & Forecasting Dashboard
+# 🌍 Incidentlytics - Incident Analytics & Forecasting Dashboard
 
-## Overview
+
+## Table of Contents
+
+
+## Intro
+
+Incidentlytics is an interactive web application built with Dash (Plotly) to visualize and analyze global accident data. The dashboard provides insights into accident trends, locations, and other critical statistics. It features maps, graphs, and filters for user-friendly exploration. Moreover, Classical Machine Learning models were incorporated for forecasting and assessment purposes.
 
 ![DashVideo-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/1095449a-7585-454a-ac47-48dd57ec7de0)
 
-An interactive web application built with Dash (Plotly) to visualize and analyze global accident data. The dashboard provides insights into accident trends, locations, and other critical statistics. It features maps, graphs, and filters for user-friendly exploration, and Classical Machine Learning models.
 
 
 ## 🔍 Project Overview
 
 This dashboard is structured into multiple pages, each offering a different perspective:
+
 
 ### 🗺️ **Home Page – Exploratory Data Analysis**
 
@@ -61,6 +67,7 @@ This section features three ML-driven models powered by **XGBoost Regressor**:
 
 
 
+
 ## 📁 Project Structure
 
 ```
@@ -79,6 +86,7 @@ This section features three ML-driven models powered by **XGBoost Regressor**:
 
 
 
+
 ## 💡 Key Technologies
 
 * **Dash & Plotly** – Interactive UI and visualization framework
@@ -87,6 +95,7 @@ This section features three ML-driven models powered by **XGBoost Regressor**:
 * **Scikit-learn** – Preprocessing and evaluation
 * **Matplotlib, Seaborn** – Additional plots
 * **SARIMA, Prophet (future scope)** – Advanced time series models
+
 
 
 
@@ -115,14 +124,17 @@ Then visit `http://127.0.0.1:8050/` in your browser.
 
 
 
+
 ## 🤝 Let's Collaborate
 
 This project was a great experience combining data science, visualization, and ML modeling. If you’re passionate about forecasting, urban safety, or real-world ML applications—feel free to connect!
 
 
-## Collaborators
 
--
--
--
+
+## 👥 Collaborators
+
+* **Amany Alsayed** – [LinkedIn](https://www.linkedin.com/in/amany-alsayed82) | [GitHub](https://github.com/Amany-alsayed)  | [Email](amanyalsayed82@gmail.com)
+* **Sara Elwatany** – [LinkedIn](https://www.linkedin.com/in/saraelwatany) | [GitHub](https://github.com/SaraElwatany)  | [Email](saraayman10000@gmail.com)
+* **Zad Walid** – [LinkedIn](https://www.linkedin.com/in/zadwalid) | [GitHub](https://github.com/Zad-Walid)  | [Email](zadwalid06@gmail.com)
 
