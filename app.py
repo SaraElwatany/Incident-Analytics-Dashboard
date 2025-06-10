@@ -4,7 +4,7 @@ from dash import Dash, html, dcc, Input, Output
 
 # User-Defined Modules
 from pages.page1_home import create_insights_layout 
-from pages.page2_trends import trends_layout  
+from pages.page2_trends import create_trends_layout
 from pages.page3_forecast import create_forecast_layout 
 
 # Initialize the dash application
@@ -201,20 +201,7 @@ sidebar = html.Div([
 ], style=sidebar_style)
 
 # Empty Sidebar (for other pages)
-empty_sidebar = html.Div([
-    html.Div([
-        html.H4("Filters", 
-               style={
-                   'color': '#001f3f',
-                   'font-weight': '700',
-                   'margin-bottom': '25px',
-                   'text-align': 'center',
-                   'font-family': 'Segoe UI, sans-serif'
-               }),
-        # You can add a logo or leave it empty for spacing
-    ])
-], style=sidebar_style)
-
+ 
 # App Layout
 app.layout = dmc.MantineProvider([
     dcc.Location(id="page-url"),
@@ -260,6 +247,7 @@ app.layout = dmc.MantineProvider([
 
 home_layout = create_insights_layout()
 forecast_layout = create_forecast_layout()
+trends_layout=create_trends_layout()
 
 @app.callback(
     Output("main-layout", "children"),
@@ -274,9 +262,8 @@ def display_page(pathname):
         ])
     elif pathname == "/trends":
         # Trends page: empty sidebar for alignment
-        return html.Div([
-            empty_sidebar,
-            html.Div(trends_layout, style=content_style)
+        return html.Div([ 
+            html.Div(trends_layout, style={**content_style,'margin-left': 'auto','margin-right': 'auto'}),
         ])
     elif pathname == "/TimeSeries":
         # Forecast page: no sidebar, with analytics globe background
@@ -291,7 +278,6 @@ def display_page(pathname):
         )
     else:
         return html.Div([
-            empty_sidebar,
             html.Div(
                 html.H2("404 - Page Not Found", 
                         style={'text-align': 'center', 'color': '#001f3f', 'margin-top': '100px'}),
@@ -335,4 +321,4 @@ def clear_filters(n_clicks):
     return None, None
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

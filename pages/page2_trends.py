@@ -1,3 +1,5 @@
+from dash_bootstrap_components._components.CardBody import CardBody
+from dash_bootstrap_components._components.CardHeader import CardHeader
 import pandas as pd
 import plotly.express as px 
 import dash_bootstrap_components as dbc 
@@ -26,16 +28,16 @@ header_trends = html.Div([
 # ---------- Global Styles ----------
 styles = {
     "card": {
-        "border": "2px solid #001f3f",
+        "border": "2px solid #001f3f", 
         "borderRadius": "15px",
         "box-shadow": "0 4px 15px rgba(0,31,63,0.1)",
-        "margin-left": "80px",
-        "margin-bottom": "20px",
-        "padding": "1rem"
+         
     },
     "card_title": {
-        "fontWeight": "bold",
-        "color": "#001f3f"
+        'fontWeight': 'bold',
+        'color': '#001f3f',
+        'margin': '0'
+
     },
     "tab": {
         'border': '2px solid #001f3f',
@@ -52,7 +54,12 @@ styles = {
         "borderRadius": "25px",
         "margin": "10px",
         "color": "#001f3f"
-    }
+    },
+    "card_header":{
+      'background-color': '#f8f9fa',
+      'border-bottom': '2px solid #001f3f'
+    },
+
 }
 
 # ---------- Figure Generators ----------
@@ -112,27 +119,40 @@ def create_accidents_with_time():
     fig.update_traces(hovertemplate='%{customdata[0]}<extra></extra>')
     return fig
 
-# ---------- Layout ----------
-trends_layout = html.Div([
+
+ # ---------- Layout ----------   
+def create_trends_layout():
+    trends_layout = html.Div([
     #header_trends,
     html.Div([
         dbc.Card([
-            html.H5("Accident Trends Over Time", className="card-title text-center mt-3", style=styles["card_title"]),
-            dcc.DatePickerRange(   
-                id='date-range',
-                start_date=accidents_df['Date'].min(),
-                end_date=accidents_df['Date'].max(),
-                min_date_allowed=accidents_df['Date'].min(),
-                max_date_allowed=accidents_df['Date'].max(),
-                display_format='YYYY-MM-DD',
-                style=styles["datepicker"]
-            ),
-            dcc.Graph(id='time-series'),
-        ], className="mb-4 p-3", style=styles["card"]),
+            dbc.CardHeader([
+                html.H5("Accident Trends Over Time",
+                        className="card-title text-center",
+                        style=styles["card_title"]
+                ),
+            ],style=styles['card_header']),
+            dbc.CardBody([
+                dcc.DatePickerRange(   
+                    id='date-range',
+                    start_date=accidents_df['Date'].min(),
+                    end_date=accidents_df['Date'].max(),
+                    min_date_allowed=accidents_df['Date'].min(),
+                    max_date_allowed=accidents_df['Date'].max(),
+                    display_format='YYYY-MM-DD',
+                    style=styles["datepicker"]
+                ),
+                dcc.Graph(id='time-series'),
+            ]),
+            
+        ], className="mb-4", style=styles["card"]),
 
         dbc.Card([
-            html.Div(id='env-title', className="card-title text-center mt-3"),
-            dcc.Dropdown(
+            dbc.CardHeader([
+                html.Div(id='env-title', className="card-title text-center"),
+            ],style=styles['card_header']),
+            dbc.CardBody([
+                dcc.Dropdown(
                 id='env-dropdown',
                 options=[
                     {'label': 'Weather Condition', 'value': 'Weather Condition'},
@@ -143,12 +163,16 @@ trends_layout = html.Div([
                 style={"margin": "10px"}
             ),
             dcc.Graph(id='env-boxplot')
-        ], className="mb-4 p-3", style=styles["card"]),
+            ]),
+        ], className="mb-4", style=styles["card"]),
 
         dbc.Card([
-            html.H5("Casualties in 2023 vs Casualties in 2024 Monthly Trend",
-                    className="card-title text-center mt-3", style=styles["card_title"]),
-            dcc.Tabs(
+            dbc.CardHeader([
+                html.H5("Casualties in 2023 vs Casualties in 2024 Monthly Trend",
+                className="card-title text-center", style=styles["card_title"]),
+            ],style=styles['card_header']),
+            dbc.CardBody([
+                dcc.Tabs(
                 id='metric-selector',
                 value='Casualties',
                 children=[
@@ -157,33 +181,43 @@ trends_layout = html.Div([
                 ],
             ),
             dcc.Graph(id='monthly-trend-graph')
-        ], className="mb-4 p-3", style=styles["card"]),
+            ]),
+        ], className="mb-4", style=styles["card"]),
 
-dbc.Row([
-    dbc.Col([
-        dbc.Card([
-            html.H5(
-                "Accident Severity (Based on Casualties & Vehicles)",
-                className="card-title text-center mt-3",
-                style=styles["card_title"]
-            ),
-            dcc.Graph(figure=create_severity_figure(), style={"height": "350px"}),
-        ], className="mb-4 p-3", style={**styles["card"], "minHeight": "430px"})
-    ], width=6),
-    dbc.Col([
-        dbc.Card([
-            html.H5(
-                "Accidents by Time of Day",
-                className="card-title text-center mt-3",
-                style=styles["card_title"]
-            ),
-            dcc.Graph(figure=create_accidents_with_time(), style={"height": "350px"}),
-        ], className="mb-4 p-3", style={**styles["card"], "minHeight": "430px"})
-    ], width=6),
-])
+        dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader([
+                        html.H5(
+                        "Accident Severity (Based on Casualties & Vehicles)",
+                        className="card-title text-center",
+                        style=styles["card_title"]
+                    ),
+                    ],style=styles['card_header']),
+                    dbc.CardBody([
+                        dcc.Graph(figure=create_severity_figure(), style={"height": "350px"}),
+                    ]),
+                ], className="mb-4", style={**styles["card"],"height":"500px"})
+            ]),
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader([
+                        html.H5(
+                        "Accidents by Time of Day",
+                        className="card-title text-center",
+                        style=styles["card_title"]
+                    ),
+                    ],style=styles['card_header']),
+                    dbc.CardBody([
+                        dcc.Graph(figure=create_accidents_with_time(), style={"height": "350px"}),
+                    ]),
+                ], className="mb-4", style={**styles["card"],"height":"500px"})
+            ]),
+        ])
     ], style={"padding": "0 30px"})
-], style={"font-family": "Segoe UI, sans-serif"})
-
+    ], style={"font-family": "Segoe UI, sans-serif"})
+    return trends_layout
+ 
 # ---------- Callbacks ----------
 @callback(
     Output('time-series', 'figure'),
