@@ -135,6 +135,6 @@ This project was a great experience combining data science, visualization, and M
 ## 👥 Collaborators
 
 * **Amany Alsayed** – [LinkedIn](https://www.linkedin.com/in/amany-alsayed82) | [GitHub](https://github.com/Amany-alsayed)  | [Email](amanyalsayed82@gmail.com)
-* **Sara Elwatany** – [LinkedIn](https://www.linkedin.com/in/saraelwatany) | [GitHub](https://github.com/SaraElwatany)  | [Email](saraayman10000@gmail.com)
+* **Sara Elwatany** – [LinkedIn](https://www.linkedin.com/in/sara-elwatany) | [GitHub](https://github.com/SaraElwatany)  | [Email](saraayman10000@gmail.com)
 * **Zad Walid** – [LinkedIn](https://www.linkedin.com/in/zadwalid) | [GitHub](https://github.com/Zad-Walid)  | [Email](zadwalid06@gmail.com)
 
